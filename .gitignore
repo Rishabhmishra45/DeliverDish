@@ -1,0 +1,62 @@
+# Dependencies
+node_modules/
+
+# Environment Variables
+.env
+.env.*
+.env*
+!.env.example
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build Files
+dist/
+build/
+
+# Coverage
+coverage/
+
+# Cache
+.cache/
+.parcel-cache/
+.vite/
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# IDE Files
+.vscode/
+.idea/
+
+# Temporary Files
+tmp/
+temp/
+
+# Uploads
+uploads/
+public/uploads/
+
+# MongoDB Local Data
+mongodb-data/
+
+# Frontend
+frontend/node_modules/
+frontend/build/
+
+# Backend
+backend/node_modules/
+
+# Package Locks (optional)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# Vercel / Netlify
+.vercel/
+.netlify/
