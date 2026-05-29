@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import { IoIosArrowRoundBack } from "react-icons/io";
 import { useNavigate } from 'react-router-dom';
+import axios from "axios"
+import { serverUrl } from "../App"
 
 const ForgotPassword = () => {
 
@@ -11,6 +13,42 @@ const ForgotPassword = () => {
     const [confirmPassword, setConfirmPassword] = useState("")
 
     const navigate = useNavigate()
+
+    const handleSendOtp = async () => {
+        try {
+            const result = await axios.post(`${serverUrl}/api/auth/send-otp`, { email },
+                { withCredentials: true })
+            console.log(result)
+            setStep(2)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const handleVerifyOtp = async () => {
+        try {
+            const result = await axios.post(`${serverUrl}/api/auth/verify-otp`, { email, otp },
+                { withCredentials: true })
+            console.log(result)
+            setStep(3)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const handleResetPassword = async () => {
+        if (newPassword != confirmPassword) {
+            return null
+        }
+        try {
+            const result = await axios.post(`${serverUrl}/api/auth/reset-password`, { email, newPassword },
+                { withCredentials: true })
+            console.log(result)
+            navigate("/signin")
+        } catch (error) {
+            console.log(error)
+        }
+    }
 
     return (
 
@@ -61,16 +99,7 @@ const ForgotPassword = () => {
                         {/* send otp button */}
                         <button
                             className='w-full font-semibold py-2 rounded-lg transition duration-200 bg-[#ff4d2d] text-white hover:bg-[#e64323] cursor-pointer'
-                            onClick={() => {
-
-                                if (!email) {
-                                    return alert("Please enter email")
-                                }
-
-                                console.log("Send OTP")
-
-                                setStep(2)
-                            }}
+                            onClick={handleSendOtp}
                         >
                             Send OTP
                         </button>
@@ -104,6 +133,7 @@ const ForgotPassword = () => {
 
                         <button
                             className={'w-full font-semibold py-2 rounded-lg transition duration-200 bg-[#ff4d2d] text-white hover:bg-[#e64323] cursor-pointer'}
+                            onClick={handleVerifyOtp}
                         >
                             Verify
                         </button>
@@ -156,6 +186,7 @@ const ForgotPassword = () => {
 
                         <button
                             className={'w-full font-semibold py-2 rounded-lg transition duration-200 bg-[#ff4d2d] text-white hover:bg-[#e64323] cursor-pointer'}
+                            onClick={handleResetPassword}
                         >
                             Reset Password
                         </button>

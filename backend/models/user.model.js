@@ -30,7 +30,7 @@ const userSchema = new mongoose.Schema({
         default: false
     },
     otpExpires: {
-        type: Data
+        type: Date
     }
 }, { timestamps: true })
 
