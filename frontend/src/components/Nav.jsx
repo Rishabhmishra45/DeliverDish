@@ -14,6 +14,7 @@ function Nav() {
     const [isSearchOpen, setIsSearchOpen] = useState(false)
     const [isProfileOpen, setIsProfileOpen] = useState(false)
     const dispatch = useDispatch()
+    const isOwner = userData?.role === "owner"
 
     const handleLogOut = async () => {
         try {

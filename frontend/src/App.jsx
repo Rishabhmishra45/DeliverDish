@@ -9,10 +9,22 @@ import Home from './pages/Home'
 import useGetCity from './hooks/useGetCity'
 
 export const serverUrl = "http://localhost:8000"
+
 const App = () => {
+
   useGetCurrentUser()
   useGetCity()
-  const { userData } = useSelector(state => state.user)
+
+  const { userData, loading } = useSelector(state => state.user)
+
+  if (loading) {
+    return (
+      <div className='w-screen h-screen flex items-center justify-center bg-[#fff9f6]'>
+        <div className='w-10 h-10 border-4 border-[#ff4d2d] border-t-transparent rounded-full animate-spin'></div>
+      </div>
+    )
+  }
+
   return (
     <Routes>
       <Route path='/signup' element={!userData ? <SignUp /> : <Navigate to={"/"} />} />
