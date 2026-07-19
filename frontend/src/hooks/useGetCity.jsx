@@ -26,9 +26,9 @@ function useGetCity() {
                     const latitude = position.coords.latitude
                     const longitude = position.coords.longitude
 
-                    console.log("Latitude:", latitude)
-                    console.log("Longitude:", longitude)
-                    console.log("Accuracy:", position.coords.accuracy)
+                    // console.log("Latitude:", latitude)
+                    // console.log("Longitude:", longitude)
+                    // console.log("Accuracy:", position.coords.accuracy)
 
                     const result = await axios.get(
                         `https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&format=json&apiKey=${apiKey}`

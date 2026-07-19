@@ -11,6 +11,7 @@ import { setUserData } from '../redux/userSlice'
 function Nav() {
 
     const { userData, city } = useSelector(state => state.user)
+    const { myShopData } = useSelector(state => state.owner)
     const [isSearchOpen, setIsSearchOpen] = useState(false)
     const [isProfileOpen, setIsProfileOpen] = useState(false)
     const dispatch = useDispatch()
@@ -43,6 +44,8 @@ function Nav() {
         }
     }, [])
 
+
+
     return (
         <>
             {/* Navbar Container */}
@@ -57,21 +60,29 @@ function Nav() {
                     </h1>
 
                     {/* Search Section - Desktop */}
-                    <div className='hidden md:flex items-center flex-1 max-w-3xl h-[50px] bg-white shadow-md rounded-lg'>
+                    {/* Search Section - Desktop */}
+                    <div className='hidden md:flex items-center flex-1 max-w-3xl h-[50px] bg-white shadow-md rounded-lg overflow-hidden'>
 
-                        {/* Location */}
-                        <div className='flex items-center w-[200px] gap-2 px-3 border-r border-gray-300'>
-                            <FaLocationDot size={18} className='text-[#ff4d2d]' />
-                            <span className='truncate text-gray-600'>{city}</span>
-                        </div>
+                        {
+                            !isOwner &&
+                            <div className='flex items-center w-[200px] gap-2 px-3 border-r border-gray-300'>
+                                <FaLocationDot size={18} className='text-[#ff4d2d]' />
+                                <span className='truncate text-gray-600'>
+                                    {city || "Select Location"}
+                                </span>
+                            </div>
+                        }
 
-                        {/* Search Input */}
                         <div className='flex items-center flex-1 px-3 gap-2'>
                             <IoIosSearch size={20} className='text-[#ff4d2d]' />
                             <input
                                 type="text"
-                                placeholder='Search delicious food...'
-                                className='w-full outline-none text-gray-700'
+                                placeholder={
+                                    isOwner
+                                        ? "Search food items..."
+                                        : "Search delicious food..."
+                                }
+                                className='w-full outline-none text-gray-700 bg-transparent'
                             />
                         </div>
 
@@ -81,12 +92,17 @@ function Nav() {
                     <div className='flex items-center gap-2 sm:gap-4'>
 
                         {/* Mobile Location */}
-                        <div className='flex items-center gap-2 md:hidden'>
-                            <FaLocationDot size={18} className='text-[#ff4d2d]' />
-                            <span className='text-sm text-gray-600'>{city}</span>
-                        </div>
+                        {
+                            !isOwner &&
+                            <div className='flex items-center gap-2 md:hidden'>
+                                <FaLocationDot size={18} className='text-[#ff4d2d]' />
+                                <span className='text-sm text-gray-600'>
+                                    {city || "Location"}
+                                </span>
+                            </div>
+                        }
 
-                        {/* Mobile Search Button */}
+                        {/* Mobile Search */}
                         <button
                             onClick={() => setIsSearchOpen(true)}
                             className='md:hidden'
@@ -94,46 +110,74 @@ function Nav() {
                             <IoIosSearch size={22} className='text-[#ff4d2d]' />
                         </button>
 
-                        {/* Cart Icon */}
-                        <div className='relative cursor-pointer'>
-                            <FiShoppingCart size={22} className='text-[#ff4d2d]' />
-                            <span className='absolute -top-2 -right-2 text-xs font-bold text-[#ff4d2d] bg-white rounded-full px-1 min-w-[18px] text-center'>
-                                0
-                            </span>
-                        </div>
+                        {/* User Cart */}
+                        {
+                            !isOwner &&
+                            <div className='relative cursor-pointer'>
+                                <FiShoppingCart size={22} className='text-[#ff4d2d]' />
+                                <span className='absolute -top-2 -right-2 text-xs font-bold text-[#ff4d2d] bg-white rounded-full px-1'>
+                                    0
+                                </span>
+                            </div>
+                        }
 
-                        {/* My Orders Button */}
-                        <button className='hidden sm:block px-3 py-1.5 rounded-lg bg-[#ff4d2d]/10 text-[#ff4d2d] text-sm font-medium hover:bg-[#ff4d2d]/20 transition'>
-                            My Orders
+                        {/* Owner Add Food */}
+                        {
+                            isOwner && myShopData &&
+                            <button className='hidden sm:block px-3 py-2 rounded-lg bg-[#ff4d2d] text-white text-sm font-medium hover:bg-[#e64323] transition'>
+                                + Add Food Item
+                            </button>
+                        }
+
+                        {/* Orders */}
+                        <button className='hidden sm:block px-3 py-2 rounded-lg bg-[#ff4d2d]/10 text-[#ff4d2d] text-sm font-medium hover:bg-[#ff4d2d]/20 transition'>
+                            {isOwner ? "Orders" : "My Orders"}
                         </button>
 
-                        {/* User Avatar */}
+                        {/* Profile */}
                         <div className='relative' ref={profileRef}>
                             <div
                                 onClick={() => setIsProfileOpen(!isProfileOpen)}
-                                className='w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center bg-[#ff4d2d] text-white text-sm sm:text-base shadow-md font-semibold cursor-pointer'
+                                className='w-10 h-10 rounded-full flex items-center justify-center bg-[#ff4d2d] text-white shadow-md font-semibold cursor-pointer'
                             >
                                 {userData?.fullName?.charAt(0)?.toUpperCase() || "U"}
                             </div>
 
                             {isProfileOpen && (
-                                <div className='absolute right-0 top-[56px] w-[220px] bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden z-[99999]'>
+                                <div className='absolute right-0 top-[55px] w-[220px] bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden z-[99999]'>
 
                                     <div className='px-4 py-3 border-b border-gray-100'>
                                         <p className='text-sm font-semibold text-gray-800'>
-                                            {userData?.fullName}
+                                            {userData?.fullName || "User"}
                                         </p>
                                     </div>
 
-                                    <button className='md:hidden w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50'>
-                                        My Orders
-                                    </button>
+                                    {
+                                        isOwner ? (
+                                            <>
+                                                {myShopData && (
+                                                    <button className='md:hidden w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50'>
+                                                        Add Food Item
+                                                    </button>
+                                                )}
 
-                                    <button className='w-full text-left px-4 py-3 text-sm text-red-500 hover:bg-red-50'
-                                        onClick={handleLogOut}>
+                                                <button className='md:hidden w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50'>
+                                                    Orders
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <button className='md:hidden w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50'>
+                                                My Orders
+                                            </button>
+                                        )
+                                    }
+
+                                    <button
+                                        onClick={handleLogOut}
+                                        className='w-full text-left px-4 py-3 text-sm text-red-500 hover:bg-red-50'
+                                    >
                                         Logout
                                     </button>
-
                                 </div>
                             )}
                         </div>
