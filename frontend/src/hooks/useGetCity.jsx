@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setCity } from "../redux/userSlice";
+import { setCity, setState, setAddress } from "../redux/userSlice";
 
 function useGetCity() {
 
@@ -13,9 +13,17 @@ function useGetCity() {
     useEffect(() => {
 
         const savedCity = localStorage.getItem("city")
+        const savedState = localStorage.getItem("state")
+        const savedAddress = localStorage.getItem("address")
 
         if (savedCity) {
             dispatch(setCity(savedCity))
+        }
+        if (savedState) {
+            dispatch(setState(savedState))
+        }
+        if (savedAddress) {
+            dispatch(setAddress(savedAddress))
         }
 
         navigator.geolocation.getCurrentPosition(
@@ -46,9 +54,20 @@ function useGetCity() {
                         locationData?.state_district ||
                         locationData?.state
 
+                    const state = locationData?.state
+                    const address = locationData?.address_line2 || locationData?.formatted
+
                     if (city) {
                         dispatch(setCity(city))
                         localStorage.setItem("city", city)
+                    }
+                    if (state) {
+                        dispatch(setState(state))
+                        localStorage.setItem("state", state)
+                    }
+                    if (address) {
+                        dispatch(setAddress(address))
+                        localStorage.setItem("address", address)
                     }
 
                 } catch (error) {

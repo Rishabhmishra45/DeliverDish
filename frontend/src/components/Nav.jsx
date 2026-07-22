@@ -7,6 +7,7 @@ import { MdClose } from "react-icons/md"
 import axios from 'axios'
 import { serverUrl } from '../App'
 import { setUserData } from '../redux/userSlice'
+import { useNavigate } from 'react-router-dom'
 
 function Nav() {
 
@@ -14,6 +15,7 @@ function Nav() {
     const { myShopData } = useSelector(state => state.owner)
     const [isSearchOpen, setIsSearchOpen] = useState(false)
     const [isProfileOpen, setIsProfileOpen] = useState(false)
+    const navigate=useNavigate()
     const dispatch = useDispatch()
     const isOwner = userData?.role === "owner"
 
@@ -124,7 +126,8 @@ function Nav() {
                         {/* Owner Add Food */}
                         {
                             isOwner && myShopData &&
-                            <button className='hidden sm:block px-3 py-2 rounded-lg bg-[#ff4d2d] text-white text-sm font-medium hover:bg-[#e64323] transition'>
+                            <button className='hidden sm:block px-3 py-2 rounded-lg bg-[#ff4d2d] text-white text-sm font-medium hover:bg-[#e64323] transition'
+                            onClick={()=>navigate("/add-food")}>
                                 + Add Food Item
                             </button>
                         }
@@ -156,7 +159,8 @@ function Nav() {
                                         isOwner ? (
                                             <>
                                                 {myShopData && (
-                                                    <button className='md:hidden w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50'>
+                                                    <button className='md:hidden w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50'
+                                                    onClick={()=>navigate("/add-food")}>
                                                         Add Food Item
                                                     </button>
                                                 )}

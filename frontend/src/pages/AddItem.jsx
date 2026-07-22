@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { FaUtensils } from 'react-icons/fa'
@@ -7,18 +7,31 @@ import axios from 'axios'
 import { serverUrl } from '../App'
 import { setMyShopData } from '../redux/ownerSlice'
 
-const CreateEditShop = () => {
+const categories = [
+  "Snacks",
+  "Main Course",
+  "Desserts",
+  "Pizza",
+  "Burgers",
+  "Sandwiches",
+  "South Indian",
+  "North Indian",
+  "Chinese",
+  "Fast Food",
+  "Others"
+]
+
+const AddItem = () => {
 
   const { myShopData } = useSelector(state => state.owner)
-  const { city: reduxCity, state: reduxState, address: reduxAddress } = useSelector(state => state.user)
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
-  const [name, setName] = useState(myShopData?.name || "")
-  const [address, setAddress] = useState(myShopData?.address || reduxAddress || "")
-  const [city, setCity] = useState(myShopData?.city || reduxCity || "")
-  const [state, setState] = useState(myShopData?.state || reduxState || "")
-  const [frontendImage, setFrontendImage] = useState(myShopData?.image || null)
+  const [name, setName] = useState("")
+  const [category, setCategory] = useState(categories[0])
+  const [foodType, setFoodType] = useState("veg")
+  const [price, setPrice] = useState("")
+  const [frontendImage, setFrontendImage] = useState(null)
   const [backendImage, setBackendImage] = useState(null)
   const [loading, setLoading] = useState(false)
 
@@ -30,17 +43,7 @@ const CreateEditShop = () => {
     }
   }
 
-  // City/State/Address turant Redux se mil jaate hain (useGetCity hook App.jsx me
-  // pehle hi fetch kar ke localStorage + Redux me daal chuka hota hai)
-  useEffect(() => {
-    if (myShopData) return
-
-    if (reduxCity && !city) setCity(reduxCity)
-    if (reduxState && !state) setState(reduxState)
-    if (reduxAddress && !address) setAddress(reduxAddress)
-  }, [reduxCity, reduxState, reduxAddress])
-
-  const handleSave = async (e) => {
+  const handleAddItem = async (e) => {
     e.preventDefault()
 
     setLoading(true)
@@ -49,20 +52,24 @@ const CreateEditShop = () => {
 
       const formData = new FormData()
       formData.append("name", name)
-      formData.append("city", city)
-      formData.append("state", state)
-      formData.append("address", address)
+      formData.append("category", category)
+      formData.append("foodType", foodType)
+      formData.append("price", price)
       if (backendImage) {
         formData.append("image", backendImage)
       }
 
       const result = await axios.post(
-        `${serverUrl}/api/shop/create-edit`,
+        `${serverUrl}/api/item/add-item`,
         formData,
         { withCredentials: true }
       )
 
-      dispatch(setMyShopData(result.data))
+      dispatch(setMyShopData({
+        ...myShopData,
+        items: [result.data, ...(myShopData?.items || [])]
+      }))
+
       navigate("/")
 
     } catch (error) {
@@ -89,17 +96,17 @@ const CreateEditShop = () => {
             <FaUtensils className='text-[#ff4d2d] w-8 h-8' />
           </div>
           <h2 className='text-2xl font-bold text-gray-800'>
-            {myShopData ? "Edit Shop" : "Add Shop"}
+            Add Food Item
           </h2>
         </div>
 
-        <form onSubmit={handleSave} className='space-y-4'>
+        <form onSubmit={handleAddItem} className='space-y-4'>
 
           <div>
             <label className='block text-sm font-medium text-gray-700 mb-1'>Name</label>
             <input
               type="text"
-              placeholder='Enter Shop Name'
+              placeholder='Enter Food Name'
               value={name}
               onChange={(e) => setName(e.target.value)}
               className='w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:border-[#ff4d2d]'
@@ -108,7 +115,7 @@ const CreateEditShop = () => {
           </div>
 
           <div>
-            <label className='block text-sm font-medium text-gray-700 mb-1'>Shop Image</label>
+            <label className='block text-sm font-medium text-gray-700 mb-1'>Food Image</label>
             <input
               type="file"
               accept='image/*'
@@ -119,7 +126,7 @@ const CreateEditShop = () => {
               <div className='w-full h-40 mt-3 rounded-xl overflow-hidden border-2 border-orange-200 bg-gray-50'>
                 <img
                   src={frontendImage}
-                  alt="shop"
+                  alt="food"
                   className='w-full h-full object-cover'
                 />
               </div>
@@ -128,36 +135,40 @@ const CreateEditShop = () => {
 
           <div className='flex gap-3'>
             <div className='flex-1'>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>City</label>
-              <input
-                type="text"
-                placeholder='City'
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                className='w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:border-[#ff4d2d]'
+              <label className='block text-sm font-medium text-gray-700 mb-1'>Category</label>
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className='w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:border-[#ff4d2d] bg-white'
                 required
-              />
+              >
+                {categories.map((cat) => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
             </div>
             <div className='flex-1'>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>State</label>
-              <input
-                type="text"
-                placeholder='State'
-                value={state}
-                onChange={(e) => setState(e.target.value)}
-                className='w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:border-[#ff4d2d]'
+              <label className='block text-sm font-medium text-gray-700 mb-1'>Food Type</label>
+              <select
+                value={foodType}
+                onChange={(e) => setFoodType(e.target.value)}
+                className='w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:border-[#ff4d2d] bg-white'
                 required
-              />
+              >
+                <option value="veg">Veg</option>
+                <option value="non veg">Non Veg</option>
+              </select>
             </div>
           </div>
 
           <div>
-            <label className='block text-sm font-medium text-gray-700 mb-1'>Address</label>
+            <label className='block text-sm font-medium text-gray-700 mb-1'>Price</label>
             <input
-              type="text"
-              placeholder='Enter Shop Address'
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
+              type="number"
+              placeholder='Enter Price'
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              min={0}
               className='w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:border-[#ff4d2d]'
               required
             />
@@ -168,7 +179,7 @@ const CreateEditShop = () => {
             disabled={loading}
             className='w-full bg-[#ff4d2d] text-white py-2 rounded-full font-medium shadow-md hover:bg-orange-600 transition-colors duration-200 disabled:opacity-60'
           >
-            {loading ? "Saving..." : "Save"}
+            {loading ? "Adding..." : "Add Item"}
           </button>
 
         </form>
@@ -179,4 +190,4 @@ const CreateEditShop = () => {
   )
 }
 
-export default CreateEditShop
+export default AddItem

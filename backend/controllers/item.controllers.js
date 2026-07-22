@@ -17,6 +17,9 @@ export const addItem = async (req, res) => {
             name, category, foodType, price, image, shop: shop._id
         })
 
+        shop.items.unshift(item._id)
+        await shop.save()
+
         return res.status(201).json(item)
     } catch (error) {
         return res.status(500).json({ message: `add item error ${error}` })
@@ -42,5 +45,25 @@ export const editItem = async (req, res) => {
         return res.status(200).json(item)
     } catch (error) {
         return res.status(500).json({ message: `edit item error ${error}` })
+    }
+}
+
+
+export const deleteItem = async (req, res) => {
+    try {
+        const itemId = req.params.itemId
+
+        const item = await Item.findByIdAndDelete(itemId)
+        if (!item) {
+            return res.status(400).json({ message: "item not found" })
+        }
+
+        await Shop.findByIdAndUpdate(item.shop, {
+            $pull: { items: item._id }
+        })
+
+        return res.status(200).json({ message: "item deleted", itemId })
+    } catch (error) {
+        return res.status(500).json({ message: `delete item error ${error}` })
     }
 }
