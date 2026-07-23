@@ -8,6 +8,7 @@ import { useSelector } from 'react-redux'
 import Home from './pages/Home'
 import useGetCity from './hooks/useGetCity'
 import useGetMyShop from './hooks/useGetMyShop'
+import useGetShopByCity from './hooks/useGetShopByCity'
 import CreateEditShop from './pages/CreateEditShop'
 import AddItem from './pages/AddItem'
 import EditItem from './pages/EditItem'
@@ -19,6 +20,7 @@ const App = () => {
   useGetCurrentUser()
   useGetCity()
   useGetMyShop()
+  useGetShopByCity()
 
   const { userData, loading } = useSelector(state => state.user)
 

@@ -15,7 +15,7 @@ function Nav() {
     const { myShopData } = useSelector(state => state.owner)
     const [isSearchOpen, setIsSearchOpen] = useState(false)
     const [isProfileOpen, setIsProfileOpen] = useState(false)
-    const navigate=useNavigate()
+    const navigate = useNavigate()
     const dispatch = useDispatch()
     const isOwner = userData?.role === "owner"
 
@@ -127,7 +127,7 @@ function Nav() {
                         {
                             isOwner && myShopData &&
                             <button className='hidden sm:block px-3 py-2 rounded-lg bg-[#ff4d2d] text-white text-sm font-medium hover:bg-[#e64323] transition'
-                            onClick={()=>navigate("/add-food")}>
+                                onClick={() => navigate("/add-food")}>
                                 + Add Food Item
                             </button>
                         }
@@ -160,7 +160,7 @@ function Nav() {
                                             <>
                                                 {myShopData && (
                                                     <button className='md:hidden w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50'
-                                                    onClick={()=>navigate("/add-food")}>
+                                                        onClick={() => navigate("/add-food")}>
                                                         Add Food Item
                                                     </button>
                                                 )}

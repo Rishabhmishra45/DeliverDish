@@ -20,3 +20,30 @@ body {
     overflow-y: auto;
     overflow-x: hidden;
 }
+
+
+/* Hide scrollbar for all browsers */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Extra small screen breakpoint */
+@media (min-width: 400px) {
+  .xs\:w-\[120px\] {
+    width: 120px;
+  }
+  .xs\:w-\[150px\] {
+    width: 150px;
+  }
+  .xs\:h-\[95px\] {
+    height: 95px;
+  }
+  .xs\:text-sm {
+    font-size: 0.875rem;
+  }
+}
