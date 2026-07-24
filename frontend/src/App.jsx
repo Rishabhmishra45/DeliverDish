@@ -12,6 +12,7 @@ import useGetShopByCity from './hooks/useGetShopByCity'
 import CreateEditShop from './pages/CreateEditShop'
 import AddItem from './pages/AddItem'
 import EditItem from './pages/EditItem'
+import ShopDetails from './pages/ShopDetails'
 
 export const serverUrl = "http://localhost:8000"
 
@@ -41,6 +42,7 @@ const App = () => {
       <Route path='/create-edit-shop' element={userData ? <CreateEditShop /> : <Navigate to={"/signin"} />} />
       <Route path='/add-food' element={userData ? <AddItem /> : <Navigate to={"/signin"} />} />
       <Route path='/edit-item/:itemId' element={userData ? <EditItem /> : <Navigate to={"/signin"} />} />
+      <Route path='/shop/:shopId' element={userData ? <ShopDetails /> : <Navigate to={"/signin"} />} />
     </Routes>
   )
 }

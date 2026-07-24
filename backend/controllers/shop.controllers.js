@@ -61,3 +61,19 @@ export const getShopByCity = async (req, res) => {
         return res.status(500).json({ message: `get shop by city error ${error}` })
     }
 }
+
+
+export const getShopById = async (req, res) => {
+    try {
+        const { shopId } = req.params
+
+        const shop = await Shop.findById(shopId).populate("owner items")
+        if (!shop) {
+            return res.status(400).json({ message: "shop not found" })
+        }
+
+        return res.status(200).json(shop)
+    } catch (error) {
+        return res.status(500).json({ message: `get shop by id error ${error}` })
+    }
+}

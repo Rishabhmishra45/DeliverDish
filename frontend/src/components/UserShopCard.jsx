@@ -1,9 +1,16 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 
 const UserShopCard = ({ shop }) => {
+
+  const navigate = useNavigate()
+
   return (
-    <div className='flex-shrink-0 w-[160px] sm:w-[190px] cursor-pointer bg-white rounded-xl shadow-md border border-orange-100 overflow-hidden hover:shadow-lg transition-shadow duration-300'>
-      <div className='w-full h-[100px] sm:h-[120px]'>
+    <div
+      onClick={() => navigate(`/shop/${shop._id}`)}
+      className='flex-shrink-0 w-[160px] sm:w-[190px] cursor-pointer bg-white rounded-xl shadow-md border border-orange-100 overflow-hidden hover:shadow-lg transition-shadow duration-300'
+    >
+      <div className='w-full h-[100px] sm:h-[120px] cursor-pointer'>
         <img
           src={shop.image}
           alt={shop.name}

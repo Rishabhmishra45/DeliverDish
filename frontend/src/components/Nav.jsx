@@ -7,12 +7,14 @@ import { MdClose } from "react-icons/md"
 import axios from 'axios'
 import { serverUrl } from '../App'
 import { setUserData } from '../redux/userSlice'
+import { setSearchText } from '../redux/searchSlice'
 import { useNavigate } from 'react-router-dom'
 
 function Nav() {
 
     const { userData, city } = useSelector(state => state.user)
     const { myShopData } = useSelector(state => state.owner)
+    const { searchText } = useSelector(state => state.search)
     const [isSearchOpen, setIsSearchOpen] = useState(false)
     const [isProfileOpen, setIsProfileOpen] = useState(false)
     const navigate = useNavigate()
@@ -62,7 +64,6 @@ function Nav() {
                     </h1>
 
                     {/* Search Section - Desktop */}
-                    {/* Search Section - Desktop */}
                     <div className='hidden md:flex items-center flex-1 max-w-3xl h-[50px] bg-white shadow-md rounded-lg overflow-hidden'>
 
                         {
@@ -84,8 +85,15 @@ function Nav() {
                                         ? "Search food items..."
                                         : "Search delicious food..."
                                 }
+                                value={searchText}
+                                onChange={(e) => dispatch(setSearchText(e.target.value))}
                                 className='w-full outline-none text-gray-700 bg-transparent'
                             />
+                            {searchText &&
+                                <button onClick={() => dispatch(setSearchText(""))}>
+                                    <MdClose size={18} className='text-gray-400 hover:text-gray-600' />
+                                </button>
+                            }
                         </div>
 
                     </div>
@@ -133,7 +141,7 @@ function Nav() {
                         }
 
                         {/* Orders */}
-                        <button className='hidden sm:block px-3 py-2 rounded-lg bg-[#ff4d2d]/10 text-[#ff4d2d] text-sm font-medium hover:bg-[#ff4d2d]/20 transition'>
+                        <button className='hidden cursor-pointer sm:block px-3 py-2 rounded-lg bg-[#ff4d2d]/10 text-[#ff4d2d] text-sm font-medium hover:bg-[#ff4d2d]/20 transition'>
                             {isOwner ? "Orders" : "My Orders"}
                         </button>
 
@@ -206,6 +214,8 @@ function Nav() {
                             <input
                                 type="text"
                                 placeholder='Search for food...'
+                                value={searchText}
+                                onChange={(e) => dispatch(setSearchText(e.target.value))}
                                 className='flex-1 outline-none bg-transparent'
                                 autoFocus
                             />

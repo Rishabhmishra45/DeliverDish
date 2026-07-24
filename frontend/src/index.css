@@ -47,3 +47,50 @@ body {
     font-size: 0.875rem;
   }
 }
+
+/* Hide Scrollbar */
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Left Button Animation */
+
+@keyframes slideLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px) scale(.8);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+/* Right Button Animation */
+
+@keyframes slideRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px) scale(.8);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+.animate-slideLeft {
+    animation: slideLeft .35s ease;
+}
+
+.animate-slideRight {
+    animation: slideRight .35s ease;
+}

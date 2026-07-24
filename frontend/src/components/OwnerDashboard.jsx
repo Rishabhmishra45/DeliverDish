@@ -15,7 +15,7 @@ function OwnerDashboard() {
       <Nav />
 
       {/* Loading */}
-      {loading ? (
+      {/* {loading ? (
         <div className="flex justify-center items-center h-[80vh]">
           <ClipLoader
             color="#ff4d2d"
@@ -23,7 +23,7 @@ function OwnerDashboard() {
             size={40}
           />
         </div>
-      ) : (
+      ) : ( */}
         <>
           {!myShopData &&
             <div className='flex justify-center items-center p-4 sm:p-6 mt-[70px]'>
@@ -37,7 +37,7 @@ function OwnerDashboard() {
                     Join our food delivery platform and reach thousands of hungry customers every day.
                   </p>
                   <button
-                    className='bg-[#ff4d2d] text-white px-5 sm:px-6 py-2 rounded-full font-medium shadow-md hover:bg-orange-600 transition-colors duration-200'
+                    className='bg-[#ff4d2d] text-white cursor-pointer px-5 sm:px-6 py-2 rounded-full font-medium shadow-md hover:bg-orange-600 transition-colors duration-200'
                     onClick={() => navigate("/create-edit-shop")}
                   >
                     Get Started
@@ -140,7 +140,7 @@ function OwnerDashboard() {
             </div>
           }
         </>
-      )}
+      {/* )} */}
     </div>
   )
 }
