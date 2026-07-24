@@ -16,6 +16,7 @@ import EditItem from './pages/EditItem'
 import ShopDetails from './pages/ShopDetails'
 import Cart from './pages/Cart'
 import Checkout from './pages/Checkout'
+import MyOrders from './pages/MyOrders'
 
 export const serverUrl = "http://localhost:8000"
 
@@ -49,6 +50,7 @@ const App = () => {
       <Route path='/shop/:shopId' element={userData ? <ShopDetails /> : <Navigate to={"/signin"} />} />
       <Route path='/cart' element={userData ? <Cart /> : <Navigate to={"/signin"} />} />
       <Route path='/checkout' element={userData ? <Checkout /> : <Navigate to={"/signin"} />} />
+      <Route path='/my-orders' element={userData ? <MyOrders /> : <Navigate to={"/signin"} />} />
     </Routes>
   )
 }

@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { IoIosArrowRoundBack } from 'react-icons/io'
-import { FaLocationDot, FaMoneyBillWave } from 'react-icons/fa6'
+import { FaLocationDot, FaMoneyBillWave, FaCircleCheck } from 'react-icons/fa6'
 import { IoSearch } from 'react-icons/io5'
 import { MdMyLocation, MdPayment } from 'react-icons/md'
 import axios from 'axios'
@@ -15,7 +15,6 @@ import Nav from '../components/Nav'
 import Toast from '../components/Toast'
 import useToast from '../hooks/useToast'
 
-// Leaflet ka default marker icon bundler me broken hota hai, isliye manually fix kiya
 delete L.Icon.Default.prototype._getIconUrl
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
@@ -50,6 +49,7 @@ const Checkout = () => {
   const [paymentMethod, setPaymentMethod] = useState("cod")
   const [loading, setLoading] = useState(false)
   const [locating, setLocating] = useState(false)
+  const [orderPlaced, setOrderPlaced] = useState(false)
 
   const subtotal = cartItems?.reduce(
     (total, c) => total + (c.item?.price || 0) * c.quantity, 0
@@ -148,9 +148,7 @@ const Checkout = () => {
         )
 
         dispatch(setCartItems([]))
-        triggerToast("Order placed successfully", "success")
-
-        setTimeout(() => navigate("/"), 1200)
+        setOrderPlaced(true)
 
       } else {
 
@@ -188,9 +186,7 @@ const Checkout = () => {
               )
 
               dispatch(setCartItems([]))
-              triggerToast("Payment successful, order placed", "success")
-
-              setTimeout(() => navigate("/"), 1200)
+              setOrderPlaced(true)
 
             } catch (error) {
               console.log(error)
@@ -225,6 +221,29 @@ const Checkout = () => {
         setLoading(false)
       }
     }
+  }
+
+  if (orderPlaced) {
+    return (
+      <div className='min-h-screen bg-[#fff9f6]'>
+        <Nav />
+        <div className='pt-[90px] px-4 flex flex-col items-center justify-center text-center' style={{ minHeight: 'calc(100vh - 90px)' }}>
+          <FaCircleCheck className='text-green-500' size={70} />
+          <h1 className='text-2xl sm:text-3xl font-bold text-gray-800 mt-5'>
+            Order Placed!
+          </h1>
+          <p className='text-gray-500 text-sm sm:text-base mt-2 max-w-sm'>
+            Thank you for your purchase. Your order is being prepared. You can track your order status in the "My Orders" section.
+          </p>
+          <button
+            onClick={() => navigate("/my-orders")}
+            className='mt-6 bg-[#ff4d2d] text-white px-6 py-3 rounded-full font-semibold shadow-md hover:bg-orange-600 transition-colors duration-200'
+          >
+            Back to my orders
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -282,8 +301,7 @@ const Checkout = () => {
                   </button>
                 </div>
 
-                {/* Map */}
-                <div className='w-full h-[220px] sm:h-[260px] rounded-lg overflow-hidden mt-3 border border-gray-300'>
+                <div className='w-full h-[220px] sm:h-[260px] rounded-lg overflow-hidden mt-3 border border-gray-200'>
                   {coords.latitude && coords.longitude
                     ? (
                       <MapContainer

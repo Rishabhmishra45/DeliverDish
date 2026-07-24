@@ -1,29 +1,51 @@
 import mongoose from "mongoose"
 
+const shopOrderItemSchema = new mongoose.Schema({
+    item: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Item",
+        required: true
+    },
+    quantity: {
+        type: Number,
+        required: true
+    },
+    price: {
+        type: Number,
+        required: true
+    }
+}, { _id: false })
+
+const shopOrderSchema = new mongoose.Schema({
+    shop: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Shop",
+        required: true
+    },
+    owner: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true
+    },
+    items: [shopOrderItemSchema],
+    subtotal: {
+        type: Number,
+        required: true
+    },
+    status: {
+        type: String,
+        enum: ["pending", "preparing", "out for delivery", "delivered", "cancelled"],
+        default: "pending"
+    }
+})
+
 const orderSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
         required: true
     },
-    items: [{
-        item: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Item"
-        },
-        quantity: {
-            type: Number,
-            required: true
-        },
-        price: {
-            type: Number,
-            required: true
-        },
-        shop: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Shop"
-        }
-    }],
+    shopOrders: [shopOrderSchema],
     subtotal: {
         type: Number,
         required: true
@@ -63,11 +85,6 @@ const orderSchema = new mongoose.Schema({
     },
     razorpayPaymentId: {
         type: String
-    },
-    orderStatus: {
-        type: String,
-        enum: ["pending", "preparing", "out for delivery", "delivered", "cancelled"],
-        default: "pending"
     }
 }, { timestamps: true })
 

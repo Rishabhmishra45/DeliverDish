@@ -1,6 +1,7 @@
 import crypto from "crypto"
 import Order from "../models/order.model.js"
 import User from "../models/user.model.js"
+import Shop from "../models/shop.model.js"
 import razorpayInstance from "../utils/razorpay.js"
 
 const DELIVERY_FEE = 40
@@ -18,24 +19,47 @@ export const placeOrder = async (req, res) => {
             return res.status(400).json({ message: "cart is empty" })
         }
 
-        const orderItems = user.cart.map((c) => ({
-            item: c.item._id,
-            quantity: c.quantity,
-            price: c.item.price,
-            shop: c.item.shop
-        }))
+        // cart ke items ko unke shop ke hisaab se group kiya
+        const groupedByShop = {}
 
-        const subtotal = orderItems.reduce(
-            (sum, i) => sum + i.price * i.quantity, 0
-        )
+        for (const c of user.cart) {
+            const shopId = c.item.shop.toString()
 
+            if (!groupedByShop[shopId]) {
+                groupedByShop[shopId] = []
+            }
+
+            groupedByShop[shopId].push({
+                item: c.item._id,
+                quantity: c.quantity,
+                price: c.item.price
+            })
+        }
+
+        const shopIds = Object.keys(groupedByShop)
+        const shops = await Shop.find({ _id: { $in: shopIds } })
+
+        const shopOrders = shops.map((shop) => {
+            const items = groupedByShop[shop._id.toString()]
+            const shopSubtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0)
+
+            return {
+                shop: shop._id,
+                owner: shop.owner,
+                items,
+                subtotal: shopSubtotal,
+                status: "pending"
+            }
+        })
+
+        const subtotal = shopOrders.reduce((sum, s) => sum + s.subtotal, 0)
         const totalAmount = subtotal + DELIVERY_FEE
 
         if (paymentMethod === "cod") {
 
             const order = await Order.create({
                 user: req.userId,
-                items: orderItems,
+                shopOrders,
                 subtotal,
                 deliveryFee: DELIVERY_FEE,
                 totalAmount,
@@ -59,7 +83,7 @@ export const placeOrder = async (req, res) => {
 
             const order = await Order.create({
                 user: req.userId,
-                items: orderItems,
+                shopOrders,
                 subtotal,
                 deliveryFee: DELIVERY_FEE,
                 totalAmount,
@@ -118,5 +142,79 @@ export const verifyPayment = async (req, res) => {
 
     } catch (error) {
         return res.status(500).json({ message: `verify payment error ${error}` })
+    }
+}
+
+
+export const getMyOrders = async (req, res) => {
+    try {
+        const orders = await Order.find({ user: req.userId })
+            .populate("shopOrders.shop")
+            .populate("shopOrders.items.item")
+            .sort({ createdAt: -1 })
+
+        return res.status(200).json(orders)
+    } catch (error) {
+        return res.status(500).json({ message: `get my orders error ${error}` })
+    }
+}
+
+
+export const getOwnerOrders = async (req, res) => {
+    try {
+        const orders = await Order.find({ "shopOrders.owner": req.userId })
+            .populate("user", "fullName mobile")
+            .populate("shopOrders.shop")
+            .populate("shopOrders.items.item")
+            .sort({ createdAt: -1 })
+
+        // sirf apne shop wala hissa hi return karo, doosri shops ka data chhupa diya
+        const myOrders = orders.map((order) => {
+            const myShopOrder = order.shopOrders.find(
+                (so) => so.owner.toString() === req.userId
+            )
+
+            return {
+                _id: order._id,
+                user: order.user,
+                deliveryAddress: order.deliveryAddress,
+                paymentMethod: order.paymentMethod,
+                paymentStatus: order.paymentStatus,
+                createdAt: order.createdAt,
+                shopOrder: myShopOrder
+            }
+        })
+
+        return res.status(200).json(myOrders)
+    } catch (error) {
+        return res.status(500).json({ message: `get owner orders error ${error}` })
+    }
+}
+
+
+export const updateOrderStatus = async (req, res) => {
+    try {
+        const { orderId } = req.params
+        const { status } = req.body
+
+        const order = await Order.findById(orderId)
+        if (!order) {
+            return res.status(400).json({ message: "order not found" })
+        }
+
+        const shopOrder = order.shopOrders.find(
+            (so) => so.owner.toString() === req.userId
+        )
+
+        if (!shopOrder) {
+            return res.status(403).json({ message: "not authorized for this order" })
+        }
+
+        shopOrder.status = status
+        await order.save()
+
+        return res.status(200).json({ message: "status updated", order })
+    } catch (error) {
+        return res.status(500).json({ message: `update order status error ${error}` })
     }
 }
