@@ -15,11 +15,14 @@ function Nav() {
     const { userData, city } = useSelector(state => state.user)
     const { myShopData } = useSelector(state => state.owner)
     const { searchText } = useSelector(state => state.search)
+    const { cartItems } = useSelector(state => state.cart)
     const [isSearchOpen, setIsSearchOpen] = useState(false)
     const [isProfileOpen, setIsProfileOpen] = useState(false)
     const navigate = useNavigate()
     const dispatch = useDispatch()
     const isOwner = userData?.role === "owner"
+
+    const cartCount = cartItems?.reduce((total, c) => total + c.quantity, 0) || 0
 
     const handleLogOut = async () => {
         try {
@@ -27,6 +30,8 @@ function Nav() {
                 { withCredentials: true }
             )
             dispatch(setUserData(null))
+            localStorage.removeItem("shopsInMyCity")
+            localStorage.removeItem("cartItems")
         } catch (error) {
             console.log(error)
         }
@@ -123,10 +128,13 @@ function Nav() {
                         {/* User Cart */}
                         {
                             !isOwner &&
-                            <div className='relative cursor-pointer'>
+                            <div
+                                onClick={() => navigate("/cart")}
+                                className='relative cursor-pointer'
+                            >
                                 <FiShoppingCart size={22} className='text-[#ff4d2d]' />
                                 <span className='absolute -top-2 -right-2 text-xs font-bold text-[#ff4d2d] bg-white rounded-full px-1'>
-                                    0
+                                    {cartCount}
                                 </span>
                             </div>
                         }

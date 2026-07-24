@@ -31,7 +31,17 @@ const userSchema = new mongoose.Schema({
     },
     otpExpires: {
         type: Date
-    }
+    },
+    cart: [{
+        item: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Item"
+        },
+        quantity: {
+            type: Number,
+            default: 1
+        }
+    }]
 }, { timestamps: true })
 
 

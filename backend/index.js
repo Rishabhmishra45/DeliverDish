@@ -8,6 +8,8 @@ import cors from "cors"
 import userRouter from "./routes/user_routes.js"
 import shopRouter from "./routes/shop_routes.js"
 import itemRouter from "./routes/item_routes.js"
+import cartRouter from "./routes/cart_routes.js"
+import orderRouter from "./routes/order_routes.js"
 
 const app = express()
 const port = process.env.PORT || 5000
@@ -22,6 +24,8 @@ app.use("/api/auth", authRouter)
 app.use("/api/user", userRouter)
 app.use("/api/shop", shopRouter)
 app.use("/api/item", itemRouter)
+app.use("/api/cart", cartRouter)
+app.use("/api/order", orderRouter)
 
 app.listen(port, () => {
     connectDb()

@@ -9,10 +9,13 @@ import Home from './pages/Home'
 import useGetCity from './hooks/useGetCity'
 import useGetMyShop from './hooks/useGetMyShop'
 import useGetShopByCity from './hooks/useGetShopByCity'
+import useGetCart from './hooks/useGetCart'
 import CreateEditShop from './pages/CreateEditShop'
 import AddItem from './pages/AddItem'
 import EditItem from './pages/EditItem'
 import ShopDetails from './pages/ShopDetails'
+import Cart from './pages/Cart'
+import Checkout from './pages/Checkout'
 
 export const serverUrl = "http://localhost:8000"
 
@@ -22,6 +25,7 @@ const App = () => {
   useGetCity()
   useGetMyShop()
   useGetShopByCity()
+  useGetCart()
 
   const { userData, loading } = useSelector(state => state.user)
 
@@ -43,6 +47,8 @@ const App = () => {
       <Route path='/add-food' element={userData ? <AddItem /> : <Navigate to={"/signin"} />} />
       <Route path='/edit-item/:itemId' element={userData ? <EditItem /> : <Navigate to={"/signin"} />} />
       <Route path='/shop/:shopId' element={userData ? <ShopDetails /> : <Navigate to={"/signin"} />} />
+      <Route path='/cart' element={userData ? <Cart /> : <Navigate to={"/signin"} />} />
+      <Route path='/checkout' element={userData ? <Checkout /> : <Navigate to={"/signin"} />} />
     </Routes>
   )
 }
