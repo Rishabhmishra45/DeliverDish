@@ -1,6 +1,7 @@
 import express from "express"
 import dotenv from "dotenv"
 dotenv.config()
+import http from "http"
 import connectDb from "./config/db.js"
 import cookieParser from "cookie-parser"
 import authRouter from "./routes/authroutes.js"
@@ -10,8 +11,11 @@ import shopRouter from "./routes/shop_routes.js"
 import itemRouter from "./routes/item_routes.js"
 import cartRouter from "./routes/cart_routes.js"
 import orderRouter from "./routes/order_routes.js"
+import locationRouter from "./routes/location_routes.js"
+import { initSocket } from "./socket.js"
 
 const app = express()
+const server = http.createServer(app)
 const port = process.env.PORT || 5000
 
 app.use(cors({
@@ -26,8 +30,11 @@ app.use("/api/shop", shopRouter)
 app.use("/api/item", itemRouter)
 app.use("/api/cart", cartRouter)
 app.use("/api/order", orderRouter)
+app.use("/api/location", locationRouter)
 
-app.listen(port, () => {
+initSocket(server)
+
+server.listen(port, () => {
     connectDb()
     console.log(`server started at ${port}`)
 })

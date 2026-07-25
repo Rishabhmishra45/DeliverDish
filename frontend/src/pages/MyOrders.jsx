@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { serverUrl } from '../App'
 import Nav from '../components/Nav'
+import { useNavigate } from 'react-router-dom'
 import { FaChevronDown, FaChevronUp, FaRegCopy, FaCheck } from 'react-icons/fa6'
 import { IoFastFoodOutline } from 'react-icons/io5'
 
@@ -14,6 +15,8 @@ const statusColors = {
 }
 
 const MyOrders = () => {
+
+  const navigate = useNavigate()
 
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
@@ -43,8 +46,6 @@ const MyOrders = () => {
 
     fetchOrders(true)
 
-    // har 5 second me silently status check karo, bina loading state dikhaye,
-    // taaki owner ke status update karte hi ye page turant sync ho jaaye
     const interval = setInterval(() => fetchOrders(false), 5000)
 
     return () => clearInterval(interval)
@@ -173,6 +174,15 @@ const MyOrders = () => {
                                   </div>
                                 ))}
                               </div>
+
+                              {shopOrder.status === "out for delivery" && shopOrder.deliveryBoy &&
+                                <button
+                                  onClick={() => navigate(`/track-order/${order._id}/${shopOrder._id}`)}
+                                  className='w-full mt-3 bg-[#ff4d2d] text-white text-xs sm:text-sm font-medium py-2.5 rounded-full hover:bg-orange-600 transition-colors duration-200'
+                                >
+                                  Track Order
+                                </button>
+                              }
                             </div>
                           ))}
                         </div>

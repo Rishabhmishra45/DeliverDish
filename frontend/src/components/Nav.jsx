@@ -21,6 +21,7 @@ function Nav() {
     const navigate = useNavigate()
     const dispatch = useDispatch()
     const isOwner = userData?.role === "owner"
+    const isDeliveryBoy = userData?.role === "deliveryBoy"
 
     const cartCount = cartItems?.reduce((total, c) => total + c.quantity, 0) || 0
 
@@ -38,7 +39,13 @@ function Nav() {
     }
 
     const handleOrdersClick = () => {
-        navigate(isOwner ? "/owner-orders" : "/my-orders")
+        if (isOwner) {
+            navigate("/owner-orders")
+        } else if (isDeliveryBoy) {
+            navigate("/delivery-dashboard")
+        } else {
+            navigate("/my-orders")
+        }
     }
 
     const profileRef = useRef()
@@ -74,46 +81,48 @@ function Nav() {
                     </h1>
 
                     {/* Search Section - Desktop */}
-                    <div className='hidden md:flex items-center flex-1 max-w-3xl h-[50px] bg-white shadow-md rounded-lg overflow-hidden'>
+                    {!isDeliveryBoy &&
+                        <div className='hidden md:flex items-center flex-1 max-w-3xl h-[50px] bg-white shadow-md rounded-lg overflow-hidden'>
 
-                        {
-                            !isOwner &&
-                            <div className='flex items-center w-[200px] gap-2 px-3 border-r border-gray-300'>
-                                <FaLocationDot size={18} className='text-[#ff4d2d]' />
-                                <span className='truncate text-gray-600'>
-                                    {city || "Select Location"}
-                                </span>
-                            </div>
-                        }
-
-                        <div className='flex items-center flex-1 px-3 gap-2'>
-                            <IoIosSearch size={20} className='text-[#ff4d2d]' />
-                            <input
-                                type="text"
-                                placeholder={
-                                    isOwner
-                                        ? "Search food items..."
-                                        : "Search delicious food..."
-                                }
-                                value={searchText}
-                                onChange={(e) => dispatch(setSearchText(e.target.value))}
-                                className='w-full outline-none text-gray-700 bg-transparent'
-                            />
-                            {searchText &&
-                                <button onClick={() => dispatch(setSearchText(""))}>
-                                    <MdClose size={18} className='text-gray-400 hover:text-gray-600' />
-                                </button>
+                            {
+                                !isOwner &&
+                                <div className='flex items-center w-[200px] gap-2 px-3 border-r border-gray-300'>
+                                    <FaLocationDot size={18} className='text-[#ff4d2d]' />
+                                    <span className='truncate text-gray-600'>
+                                        {city || "Select Location"}
+                                    </span>
+                                </div>
                             }
-                        </div>
 
-                    </div>
+                            <div className='flex items-center flex-1 px-3 gap-2'>
+                                <IoIosSearch size={20} className='text-[#ff4d2d]' />
+                                <input
+                                    type="text"
+                                    placeholder={
+                                        isOwner
+                                            ? "Search food items..."
+                                            : "Search delicious food..."
+                                    }
+                                    value={searchText}
+                                    onChange={(e) => dispatch(setSearchText(e.target.value))}
+                                    className='w-full outline-none text-gray-700 bg-transparent'
+                                />
+                                {searchText &&
+                                    <button onClick={() => dispatch(setSearchText(""))}>
+                                        <MdClose size={18} className='text-gray-400 hover:text-gray-600' />
+                                    </button>
+                                }
+                            </div>
+
+                        </div>
+                    }
 
                     {/* Right Section */}
                     <div className='flex items-center gap-2 sm:gap-4'>
 
                         {/* Mobile Location */}
                         {
-                            !isOwner &&
+                            !isOwner && !isDeliveryBoy &&
                             <div className='flex items-center gap-2 md:hidden'>
                                 <FaLocationDot size={18} className='text-[#ff4d2d]' />
                                 <span className='text-sm text-gray-600'>
@@ -123,16 +132,18 @@ function Nav() {
                         }
 
                         {/* Mobile Search */}
-                        <button
-                            onClick={() => setIsSearchOpen(true)}
-                            className='md:hidden'
-                        >
-                            <IoIosSearch size={22} className='text-[#ff4d2d]' />
-                        </button>
+                        {!isDeliveryBoy &&
+                            <button
+                                onClick={() => setIsSearchOpen(true)}
+                                className='md:hidden'
+                            >
+                                <IoIosSearch size={22} className='text-[#ff4d2d]' />
+                            </button>
+                        }
 
                         {/* User Cart */}
                         {
-                            !isOwner &&
+                            !isOwner && !isDeliveryBoy &&
                             <div
                                 onClick={() => navigate("/cart")}
                                 className='relative cursor-pointer'
@@ -157,7 +168,7 @@ function Nav() {
                         <button
                             onClick={handleOrdersClick}
                             className='hidden cursor-pointer sm:block px-3 py-2 rounded-lg bg-[#ff4d2d]/10 text-[#ff4d2d] text-sm font-medium hover:bg-[#ff4d2d]/20 transition'>
-                            {isOwner ? "Orders" : "My Orders"}
+                            {isOwner ? "Orders" : isDeliveryBoy ? "Deliveries" : "My Orders"}
                         </button>
 
                         {/* Profile */}
@@ -194,6 +205,12 @@ function Nav() {
                                                     Orders
                                                 </button>
                                             </>
+                                        ) : isDeliveryBoy ? (
+                                            <button
+                                                onClick={handleOrdersClick}
+                                                className='md:hidden w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50'>
+                                                Deliveries
+                                            </button>
                                         ) : (
                                             <button
                                                 onClick={handleOrdersClick}
@@ -220,7 +237,7 @@ function Nav() {
             </div>
 
             {/* Mobile Search Modal */}
-            {isSearchOpen && (
+            {isSearchOpen && !isDeliveryBoy && (
                 <div className='fixed inset-0 z-[10000] bg-white md:hidden'>
 
                     {/* Modal Header */}
@@ -242,10 +259,12 @@ function Nav() {
                     </div>
 
                     {/* Modal Location */}
-                    <div className='flex items-center gap-2 p-4 border-b border-gray-100 bg-gray-50'>
-                        <FaLocationDot size={18} className='text-[#ff4d2d]' />
-                        <span className='text-gray-700'>{city}</span>
-                    </div>
+                    {!isOwner &&
+                        <div className='flex items-center gap-2 p-4 border-b border-gray-100 bg-gray-50'>
+                            <FaLocationDot size={18} className='text-[#ff4d2d]' />
+                            <span className='text-gray-700'>{city}</span>
+                        </div>
+                    }
 
                 </div>
             )}

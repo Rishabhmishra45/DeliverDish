@@ -26,6 +26,12 @@ const shopSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    latitude: {
+        type: Number
+    },
+    longitude: {
+        type: Number
+    },
     items:[{
         type:mongoose.Schema.Types.ObjectId,
         ref:"Item"

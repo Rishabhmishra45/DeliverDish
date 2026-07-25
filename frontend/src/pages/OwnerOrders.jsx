@@ -3,7 +3,7 @@ import axios from 'axios'
 import { serverUrl } from '../App'
 import Nav from '../components/Nav'
 import { IoFastFoodOutline } from 'react-icons/io5'
-import { FaPhone, FaLocationDot, FaRegCopy, FaCheck } from 'react-icons/fa6'
+import { FaPhone, FaLocationDot, FaRegCopy, FaCheck, FaMotorcycle } from 'react-icons/fa6'
 
 const statusColors = {
     pending: "bg-yellow-100 text-yellow-700",
@@ -13,17 +13,15 @@ const statusColors = {
     cancelled: "bg-red-100 text-red-700"
 }
 
-// har status ke baad agla valid step
+// owner sirf yahan tak status le ja sakta hai — delivered sirf delivery boy karega
 const nextStatusMap = {
     pending: "preparing",
-    preparing: "out for delivery",
-    "out for delivery": "delivered"
+    preparing: "out for delivery"
 }
 
 const nextStatusLabel = {
     preparing: "Mark as Preparing",
-    "out for delivery": "Mark Out for Delivery",
-    delivered: "Mark as Delivered"
+    "out for delivery": "Mark Out for Delivery"
 }
 
 const OwnerOrders = () => {
@@ -32,6 +30,7 @@ const OwnerOrders = () => {
     const [loading, setLoading] = useState(true)
     const [updatingId, setUpdatingId] = useState(null)
     const [copiedOrderId, setCopiedOrderId] = useState(null)
+    const [deliveryBoysMap, setDeliveryBoysMap] = useState({})
 
     const fetchOrders = async () => {
         try {
@@ -43,6 +42,27 @@ const OwnerOrders = () => {
 
             setOrders(result.data)
 
+            // jin orders ka status "out for delivery" hai unke available delivery boys fetch karo
+            const outForDeliveryOrders = result.data.filter(
+                (o) => o.shopOrder?.status === "out for delivery" && !o.shopOrder?.deliveryBoy
+            )
+
+            const boysEntries = await Promise.all(
+                outForDeliveryOrders.map(async (o) => {
+                    try {
+                        const res = await axios.get(
+                            `${serverUrl}/api/order/available-delivery-boys/${o._id}/${o.shopOrder._id}`,
+                            { withCredentials: true }
+                        )
+                        return [o.shopOrder._id, res.data.deliveryBoys || []]
+                    } catch (error) {
+                        return [o.shopOrder._id, []]
+                    }
+                })
+            )
+
+            setDeliveryBoysMap(Object.fromEntries(boysEntries))
+
         } catch (error) {
             console.log(error)
         } finally {
@@ -53,7 +73,7 @@ const OwnerOrders = () => {
     useEffect(() => {
         fetchOrders()
 
-        // har 5 second me silently naye orders/status check karo
+        // har 5 second me silently naye orders/status/delivery boys check karo
         const interval = setInterval(fetchOrders, 5000)
 
         return () => clearInterval(interval)
@@ -79,6 +99,8 @@ const OwnerOrders = () => {
                 { status: newStatus },
                 { withCredentials: true }
             )
+
+            fetchOrders()
 
         } catch (error) {
             console.log(error)
@@ -124,6 +146,9 @@ const OwnerOrders = () => {
                                     const status = order.shopOrder?.status
                                     const upcoming = nextStatusMap[status]
                                     const isUpdating = updatingId === order._id
+                                    const isOutForDelivery = status === "out for delivery"
+                                    const isAssigned = !!order.shopOrder?.deliveryBoy
+                                    const nearbyBoys = deliveryBoysMap[order.shopOrder?._id] || []
 
                                     return (
                                         <div
@@ -215,8 +240,44 @@ const OwnerOrders = () => {
                                                 {order.paymentMethod === "cod" ? "Cash on Delivery" : "Paid Online"}
                                             </p>
 
+                                            {/* Available / Assigned Delivery Boy section — sirf "out for delivery" me dikhta hai */}
+                                            {isOutForDelivery &&
+                                                <div className='mt-4 bg-orange-50 border border-orange-100 rounded-xl p-3 sm:p-4'>
+                                                    <div className='flex items-center gap-2 mb-2'>
+                                                        <FaMotorcycle className='text-[#ff4d2d]' size={14} />
+                                                        <p className='text-xs sm:text-sm font-semibold text-gray-800'>
+                                                            {isAssigned ? "Assigned Delivery Partner" : "Available Delivery Boys"}
+                                                        </p>
+                                                    </div>
+
+                                                    {isAssigned
+                                                        ? (
+                                                            <p className='text-xs sm:text-sm text-gray-700'>
+                                                                {order.shopOrder.deliveryBoy?.fullName} — {order.shopOrder.deliveryBoy?.mobile}
+                                                            </p>
+                                                        )
+                                                        : nearbyBoys.length === 0
+                                                            ? (
+                                                                <p className='text-xs sm:text-sm text-gray-500'>
+                                                                    Looking for nearby delivery partners...
+                                                                </p>
+                                                            )
+                                                            : (
+                                                                <div className='flex flex-col gap-1'>
+                                                                    {nearbyBoys.map((boy) => (
+                                                                        <p key={boy._id} className='text-xs sm:text-sm text-gray-700'>
+                                                                            {boy.fullName} - {boy.mobile}
+                                                                            <span className='text-gray-400'> · {boy.distance.toFixed(1)} km away</span>
+                                                                        </p>
+                                                                    ))}
+                                                                </div>
+                                                            )
+                                                    }
+                                                </div>
+                                            }
+
                                             {/* Status action buttons */}
-                                            {status !== "delivered" && status !== "cancelled" &&
+                                            {status !== "delivered" && status !== "cancelled" && !isOutForDelivery &&
                                                 <div className='flex gap-2 mt-4'>
                                                     {upcoming &&
                                                         <button

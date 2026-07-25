@@ -10,6 +10,7 @@ import useGetCity from './hooks/useGetCity'
 import useGetMyShop from './hooks/useGetMyShop'
 import useGetShopByCity from './hooks/useGetShopByCity'
 import useGetCart from './hooks/useGetCart'
+import useUpdateLocation from './hooks/useUpdateLocation'
 import CreateEditShop from './pages/CreateEditShop'
 import AddItem from './pages/AddItem'
 import EditItem from './pages/EditItem'
@@ -18,6 +19,8 @@ import Cart from './pages/Cart'
 import Checkout from './pages/Checkout'
 import MyOrders from './pages/MyOrders'
 import OwnerOrders from './pages/OwnerOrders'
+import DeliveryBoy from './pages/DeliveryBoy'
+import TrackOrder from './pages/TrackOrder'
 
 export const serverUrl = "http://localhost:8000"
 
@@ -28,6 +31,7 @@ const App = () => {
   useGetMyShop()
   useGetShopByCity()
   useGetCart()
+  useUpdateLocation()
 
   const { userData, loading } = useSelector(state => state.user)
 
@@ -53,6 +57,8 @@ const App = () => {
       <Route path='/checkout' element={userData ? <Checkout /> : <Navigate to={"/signin"} />} />
       <Route path='/my-orders' element={userData ? <MyOrders /> : <Navigate to={"/signin"} />} />
       <Route path='/owner-orders' element={userData ? <OwnerOrders /> : <Navigate to={"/signin"} />} />
+      <Route path='/delivery-dashboard' element={userData ? <DeliveryBoy /> : <Navigate to={"/signin"} />} />
+      <Route path='/track-order/:orderId/:shopOrderId' element={userData ? <TrackOrder /> : <Navigate to={"/signin"} />} />
     </Routes>
   )
 }

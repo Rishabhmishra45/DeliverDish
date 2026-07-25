@@ -27,6 +27,10 @@ const shopOrderSchema = new mongoose.Schema({
         ref: "User",
         required: true
     },
+    city: {
+        type: String,
+        required: true
+    },
     items: [shopOrderItemSchema],
     subtotal: {
         type: Number,
@@ -36,6 +40,16 @@ const shopOrderSchema = new mongoose.Schema({
         type: String,
         enum: ["pending", "preparing", "out for delivery", "delivered", "cancelled"],
         default: "pending"
+    },
+    deliveryBoy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        default: null
+    },
+    deliveryBoyStatus: {
+        type: String,
+        enum: ["notAssigned", "broadcasted", "assigned", "delivered"],
+        default: "notAssigned"
     }
 })
  

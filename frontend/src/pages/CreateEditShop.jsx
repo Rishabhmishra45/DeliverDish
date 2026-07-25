@@ -18,6 +18,10 @@ const CreateEditShop = () => {
   const [address, setAddress] = useState(myShopData?.address || reduxAddress || "")
   const [city, setCity] = useState(myShopData?.city || reduxCity || "")
   const [state, setState] = useState(myShopData?.state || reduxState || "")
+  const [coords, setCoords] = useState({
+    latitude: myShopData?.latitude || null,
+    longitude: myShopData?.longitude || null
+  })
   const [frontendImage, setFrontendImage] = useState(myShopData?.image || null)
   const [backendImage, setBackendImage] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -40,6 +44,28 @@ const CreateEditShop = () => {
     if (reduxAddress && !address) setAddress(reduxAddress)
   }, [reduxCity, reduxState, reduxAddress])
 
+  // shop ka exact lat/long capture karte hain — delivery boy matching (distance-based) iske liye zaroori hai
+  useEffect(() => {
+    if (myShopData?.latitude && myShopData?.longitude) return
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setCoords({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude
+        })
+      },
+      (error) => {
+        console.log(error)
+      },
+      {
+        enableHighAccuracy: false,
+        timeout: 8000,
+        maximumAge: 1000 * 60 * 30
+      }
+    )
+  }, [])
+
   const handleSave = async (e) => {
     e.preventDefault()
 
@@ -52,6 +78,8 @@ const CreateEditShop = () => {
       formData.append("city", city)
       formData.append("state", state)
       formData.append("address", address)
+      if (coords.latitude) formData.append("latitude", coords.latitude)
+      if (coords.longitude) formData.append("longitude", coords.longitude)
       if (backendImage) {
         formData.append("image", backendImage)
       }

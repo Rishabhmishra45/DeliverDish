@@ -3,7 +3,7 @@ import uploadOnCloudinary from "../utils/cloudinary.js";
 
 export const createEditShop = async (req, res) => {
     try {
-        const { name, city, state, address } = req.body
+        const { name, city, state, address, latitude, longitude } = req.body
 
         let shop = await Shop.findOne({ owner: req.userId })
 
@@ -17,14 +17,15 @@ export const createEditShop = async (req, res) => {
             return res.status(400).json({ message: "Shop image is required" })
         }
 
+        const shopData = { name, city, state, address, image, owner: req.userId }
+
+        if (latitude) shopData.latitude = latitude
+        if (longitude) shopData.longitude = longitude
+
         if (!shop) {
-            shop = await Shop.create({
-                name, city, state, address, image, owner: req.userId
-            })
+            shop = await Shop.create(shopData)
         } else {
-            shop = await Shop.findByIdAndUpdate(shop._id, {
-                name, city, state, address, image, owner: req.userId
-            }, { new: true })
+            shop = await Shop.findByIdAndUpdate(shop._id, shopData, { new: true })
         }
 
         await shop.populate("owner items")
