@@ -17,6 +17,7 @@ import ShopDetails from './pages/ShopDetails'
 import Cart from './pages/Cart'
 import Checkout from './pages/Checkout'
 import MyOrders from './pages/MyOrders'
+import OwnerOrders from './pages/OwnerOrders'
 
 export const serverUrl = "http://localhost:8000"
 
@@ -51,6 +52,7 @@ const App = () => {
       <Route path='/cart' element={userData ? <Cart /> : <Navigate to={"/signin"} />} />
       <Route path='/checkout' element={userData ? <Checkout /> : <Navigate to={"/signin"} />} />
       <Route path='/my-orders' element={userData ? <MyOrders /> : <Navigate to={"/signin"} />} />
+      <Route path='/owner-orders' element={userData ? <OwnerOrders /> : <Navigate to={"/signin"} />} />
     </Routes>
   )
 }

@@ -50,6 +50,7 @@ const Checkout = () => {
   const [loading, setLoading] = useState(false)
   const [locating, setLocating] = useState(false)
   const [orderPlaced, setOrderPlaced] = useState(false)
+  const [orderId, setOrderId] = useState(null)
 
   const subtotal = cartItems?.reduce(
     (total, c) => total + (c.item?.price || 0) * c.quantity, 0
@@ -141,13 +142,14 @@ const Checkout = () => {
 
       if (paymentMethod === "cod") {
 
-        await axios.post(
+        const result = await axios.post(
           `${serverUrl}/api/order/place-order`,
           { paymentMethod: "cod", deliveryAddress },
           { withCredentials: true }
         )
 
         dispatch(setCartItems([]))
+        setOrderId(result.data.order._id)
         setOrderPlaced(true)
 
       } else {
@@ -175,7 +177,7 @@ const Checkout = () => {
           handler: async (response) => {
             try {
 
-              await axios.post(
+              const verifyResult = await axios.post(
                 `${serverUrl}/api/order/verify-payment`,
                 {
                   razorpay_order_id: response.razorpay_order_id,
@@ -186,6 +188,7 @@ const Checkout = () => {
               )
 
               dispatch(setCartItems([]))
+              setOrderId(verifyResult.data.order._id)
               setOrderPlaced(true)
 
             } catch (error) {
@@ -235,6 +238,11 @@ const Checkout = () => {
           <p className='text-gray-500 text-sm sm:text-base mt-2 max-w-sm'>
             Thank you for your purchase. Your order is being prepared. You can track your order status in the "My Orders" section.
           </p>
+          {orderId && (
+            <p className='text-gray-600 text-xs sm:text-sm mt-3 bg-orange-50 border border-orange-100 px-4 py-2 rounded-lg'>
+              Order ID: <span className='font-semibold text-[#ff4d2d]'>{orderId}</span>
+            </p>
+          )}
           <button
             onClick={() => navigate("/my-orders")}
             className='mt-6 bg-[#ff4d2d] text-white px-6 py-3 rounded-full font-semibold shadow-md hover:bg-orange-600 transition-colors duration-200'

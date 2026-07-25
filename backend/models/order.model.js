@@ -1,5 +1,5 @@
 import mongoose from "mongoose"
-
+ 
 const shopOrderItemSchema = new mongoose.Schema({
     item: {
         type: mongoose.Schema.Types.ObjectId,
@@ -14,8 +14,8 @@ const shopOrderItemSchema = new mongoose.Schema({
         type: Number,
         required: true
     }
-}, { _id: false })
-
+})
+ 
 const shopOrderSchema = new mongoose.Schema({
     shop: {
         type: mongoose.Schema.Types.ObjectId,
@@ -38,7 +38,7 @@ const shopOrderSchema = new mongoose.Schema({
         default: "pending"
     }
 })
-
+ 
 const orderSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
@@ -87,6 +87,6 @@ const orderSchema = new mongoose.Schema({
         type: String
     }
 }, { timestamps: true })
-
+ 
 const Order = mongoose.model("Order", orderSchema)
 export default Order

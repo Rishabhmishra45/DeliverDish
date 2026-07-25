@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { serverUrl } from '../App'
 import Nav from '../components/Nav'
+import { FaChevronDown, FaChevronUp, FaRegCopy, FaCheck } from 'react-icons/fa6'
+import { IoFastFoodOutline } from 'react-icons/io5'
 
 const statusColors = {
   pending: "bg-yellow-100 text-yellow-700",
@@ -15,29 +17,54 @@ const MyOrders = () => {
 
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
+  const [expandedOrders, setExpandedOrders] = useState({})
+  const [copiedOrderId, setCopiedOrderId] = useState(null)
 
-  useEffect(() => {
+  const fetchOrders = async (isInitial = false) => {
+    try {
 
-    const fetchOrders = async () => {
-      try {
+      const result = await axios.get(
+        `${serverUrl}/api/order/my-orders`,
+        { withCredentials: true }
+      )
 
-        const result = await axios.get(
-          `${serverUrl}/api/order/my-orders`,
-          { withCredentials: true }
-        )
+      setOrders(result.data)
 
-        setOrders(result.data)
-
-      } catch (error) {
-        console.log(error)
-      } finally {
+    } catch (error) {
+      console.log(error)
+    } finally {
+      if (isInitial) {
         setLoading(false)
       }
     }
+  }
 
-    fetchOrders()
+  useEffect(() => {
+
+    fetchOrders(true)
+
+    // har 5 second me silently status check karo, bina loading state dikhaye,
+    // taaki owner ke status update karte hi ye page turant sync ho jaaye
+    const interval = setInterval(() => fetchOrders(false), 5000)
+
+    return () => clearInterval(interval)
 
   }, [])
+
+  const toggleExpand = (orderId) => {
+    setExpandedOrders((prev) => ({
+      ...prev,
+      [orderId]: !prev[orderId]
+    }))
+  }
+
+  const handleCopyOrderId = (orderId) => {
+    navigator.clipboard.writeText(orderId)
+    setCopiedOrderId(orderId)
+    setTimeout(() => {
+      setCopiedOrderId(null)
+    }, 1500)
+  }
 
   return (
     <div className='min-h-screen bg-[#fff9f6]'>
@@ -61,51 +88,104 @@ const MyOrders = () => {
             )
             : (
               <div className='flex flex-col gap-4'>
-                {orders.map((order) => (
-                  <div
-                    key={order._id}
-                    className='bg-white rounded-2xl shadow-md border border-orange-100 p-4 sm:p-5'
-                  >
-                    <div className='flex items-center justify-between mb-3'>
-                      <p className='text-xs sm:text-sm text-gray-500'>
-                        {new Date(order.createdAt).toLocaleDateString("en-IN", {
-                          day: "numeric", month: "short", year: "numeric"
-                        })}
-                      </p>
-                      <p className='text-xs sm:text-sm font-medium text-gray-700'>
-                        {order.paymentMethod === "cod" ? "Cash on Delivery" : "Paid Online"}
-                      </p>
-                    </div>
+                {orders.map((order) => {
 
-                    {order.shopOrders.map((shopOrder) => (
-                      <div key={shopOrder._id} className='border-t border-gray-100 pt-3 mt-3 first:border-t-0 first:pt-0 first:mt-0'>
-                        <div className='flex items-center justify-between mb-2'>
-                          <p className='text-sm sm:text-base font-semibold text-gray-800'>
-                            {shopOrder.shop?.name}
-                          </p>
-                          <span className={`text-[10px] sm:text-xs font-medium px-2.5 py-1 rounded-full capitalize ${statusColors[shopOrder.status] || "bg-gray-100 text-gray-700"}`}>
-                            {shopOrder.status}
-                          </span>
-                        </div>
+                  const isExpanded = !!expandedOrders[order._id]
 
-                        <div className='flex flex-col gap-1'>
-                          {shopOrder.items.map((i, idx) => (
-                            <div key={idx} className='flex items-center justify-between text-xs sm:text-sm text-gray-600'>
-                              <p>{i.item?.name} x {i.quantity}</p>
-                              <p>₹{(i.price * i.quantity).toFixed(2)}</p>
+                  return (
+                    <div
+                      key={order._id}
+                      className='bg-white rounded-2xl shadow-md border border-orange-100 p-4 sm:p-5 hover:shadow-lg transition-shadow duration-200'
+                    >
+                      <div className='flex items-center justify-between mb-1 flex-wrap gap-2'>
+                        <p className='text-xs sm:text-sm text-gray-500'>
+                          {new Date(order.createdAt).toLocaleDateString("en-IN", {
+                            day: "numeric", month: "short", year: "numeric"
+                          })}
+                        </p>
+                        <p className='text-xs sm:text-sm font-medium text-gray-700'>
+                          {order.paymentMethod === "cod" ? "Cash on Delivery" : "Paid Online"}
+                        </p>
+                      </div>
+
+                      <div className='flex items-center gap-2 mb-3'>
+                        <p className='text-[10px] sm:text-xs text-gray-400'>
+                          Order ID: <span className='font-mono text-gray-500'>{order._id}</span>
+                        </p>
+                        <button
+                          onClick={() => handleCopyOrderId(order._id)}
+                          className='text-gray-400 hover:text-[#ff4d2d] transition-colors duration-200 cursor-pointer'
+                          title="Copy order ID"
+                        >
+                          {copiedOrderId === order._id
+                            ? <FaCheck size={11} className='text-green-500' />
+                            : <FaRegCopy size={11} />
+                          }
+                        </button>
+                      </div>
+
+                      <div
+                        onClick={() => toggleExpand(order._id)}
+                        className='flex items-center justify-between cursor-pointer select-none'
+                      >
+                        <p className='text-sm sm:text-base font-semibold text-gray-800'>
+                          {order.shopOrders.length} shop{order.shopOrders.length > 1 ? "s" : ""} · ₹{order.totalAmount.toFixed(2)}
+                        </p>
+                        <button className='text-gray-500 hover:text-[#ff4d2d] transition-colors duration-200'>
+                          {isExpanded ? <FaChevronUp size={14} /> : <FaChevronDown size={14} />}
+                        </button>
+                      </div>
+
+                      {isExpanded && (
+                        <div className='mt-3'>
+                          {order.shopOrders.map((shopOrder) => (
+                            <div key={shopOrder._id} className='border-t border-gray-100 pt-3 mt-3 first:border-t-0 first:pt-0 first:mt-0'>
+                              <div className='flex items-center justify-between mb-2'>
+                                <p className='text-sm sm:text-base font-semibold text-gray-800'>
+                                  {shopOrder.shop?.name}
+                                </p>
+                                <span className={`text-[10px] sm:text-xs font-medium px-2.5 py-1 rounded-full capitalize ${statusColors[shopOrder.status] || "bg-gray-100 text-gray-700"}`}>
+                                  {shopOrder.status}
+                                </span>
+                              </div>
+
+                              <div className='flex flex-col gap-2'>
+                                {shopOrder.items.map((i) => (
+                                  <div key={i._id} className='flex items-center gap-3 text-xs sm:text-sm text-gray-600'>
+                                    {i.item?.image
+                                      ? (
+                                        <img
+                                          src={i.item.image}
+                                          alt={i.item?.name}
+                                          className='w-10 h-10 sm:w-12 sm:h-12 rounded-lg object-cover flex-shrink-0 border border-gray-200'
+                                        />
+                                      )
+                                      : (
+                                        <div className='w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-orange-50 flex items-center justify-center flex-shrink-0 border border-gray-200'>
+                                          <IoFastFoodOutline className='text-[#ff4d2d]' size={18} />
+                                        </div>
+                                      )
+                                    }
+                                    <div className='flex-1 flex items-center justify-between'>
+                                      <p>{i.item?.name} x {i.quantity}</p>
+                                      <p>₹{(i.price * i.quantity).toFixed(2)}</p>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
                             </div>
                           ))}
                         </div>
+                      )}
+
+                      <div className='border-t border-gray-200 mt-3 pt-3 flex items-center justify-between'>
+                        <p className='text-sm sm:text-base font-semibold text-gray-800'>Total Paid</p>
+                        <p className='text-sm sm:text-base font-bold text-[#ff4d2d]'>₹{order.totalAmount.toFixed(2)}</p>
                       </div>
-                    ))}
 
-                    <div className='border-t border-gray-200 mt-3 pt-3 flex items-center justify-between'>
-                      <p className='text-sm sm:text-base font-semibold text-gray-800'>Total Paid</p>
-                      <p className='text-sm sm:text-base font-bold text-[#ff4d2d]'>₹{order.totalAmount.toFixed(2)}</p>
                     </div>
-
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             )
         }

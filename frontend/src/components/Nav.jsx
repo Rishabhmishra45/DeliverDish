@@ -37,6 +37,10 @@ function Nav() {
         }
     }
 
+    const handleOrdersClick = () => {
+        navigate(isOwner ? "/owner-orders" : "/my-orders")
+    }
+
     const profileRef = useRef()
 
     useEffect(() => {
@@ -64,7 +68,8 @@ function Nav() {
                 <div className='w-full max-w-7xl flex items-center justify-between gap-2 sm:gap-4'>
 
                     {/* Logo */}
-                    <h1 className='text-xl sm:text-2xl md:text-3xl font-bold text-[#ff4d2d] whitespace-nowrap cursor-pointer'>
+                    <h1 className='text-xl sm:text-2xl md:text-3xl font-bold text-[#ff4d2d] whitespace-nowrap cursor-pointer'
+                        onClick={() => navigate("/")}>
                         DeliverDish
                     </h1>
 
@@ -149,7 +154,9 @@ function Nav() {
                         }
 
                         {/* Orders */}
-                        <button className='hidden cursor-pointer sm:block px-3 py-2 rounded-lg bg-[#ff4d2d]/10 text-[#ff4d2d] text-sm font-medium hover:bg-[#ff4d2d]/20 transition'>
+                        <button
+                            onClick={handleOrdersClick}
+                            className='hidden cursor-pointer sm:block px-3 py-2 rounded-lg bg-[#ff4d2d]/10 text-[#ff4d2d] text-sm font-medium hover:bg-[#ff4d2d]/20 transition'>
                             {isOwner ? "Orders" : "My Orders"}
                         </button>
 
@@ -181,12 +188,16 @@ function Nav() {
                                                     </button>
                                                 )}
 
-                                                <button className='md:hidden w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50'>
+                                                <button
+                                                    onClick={handleOrdersClick}
+                                                    className='md:hidden w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50'>
                                                     Orders
                                                 </button>
                                             </>
                                         ) : (
-                                            <button className='md:hidden w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50'>
+                                            <button
+                                                onClick={handleOrdersClick}
+                                                className='md:hidden w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50'>
                                                 My Orders
                                             </button>
                                         )
