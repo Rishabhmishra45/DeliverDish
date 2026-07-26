@@ -23,20 +23,27 @@ export const initSocket = (server) => {
 
     io.on("connection", (socket) => {
 
+        console.log(`[socket] connected: ${socket.id}`)
+
         // User apne order ke tracking room me join karta hai
         socket.on("joinTrackRoom", (shopOrderId) => {
             socket.join(`track_${shopOrderId}`);
+            console.log(`[socket] ${socket.id} joined room track_${shopOrderId}`)
         });
 
         // Delivery boy apni current location broadcast karta hai
         socket.on("updateDeliveryLocation", ({ shopOrderId, latitude, longitude }) => {
+            const room = io.sockets.adapter.rooms.get(`track_${shopOrderId}`)
+            console.log(`[socket] location update for track_${shopOrderId} — room size: ${room ? room.size : 0}`)
             io.to(`track_${shopOrderId}`).emit("deliveryLocationUpdate", {
                 latitude,
                 longitude
             });
         });
 
-        socket.on("disconnect", () => {});
+        socket.on("disconnect", () => {
+            console.log(`[socket] disconnected: ${socket.id}`)
+        });
     });
 
     return io;
