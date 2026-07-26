@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { serverUrl } from '../App'
 import Nav from '../components/Nav'
+import RateItemModal from '../components/RateItemModal'
 import { useNavigate } from 'react-router-dom'
-import { FaChevronDown, FaChevronUp, FaRegCopy, FaCheck } from 'react-icons/fa6'
+import { FaChevronDown, FaChevronUp, FaRegCopy, FaCheck, FaStar } from 'react-icons/fa6'
 import { IoFastFoodOutline } from 'react-icons/io5'
 
 const statusColors = {
@@ -22,6 +23,8 @@ const MyOrders = () => {
   const [loading, setLoading] = useState(true)
   const [expandedOrders, setExpandedOrders] = useState({})
   const [copiedOrderId, setCopiedOrderId] = useState(null)
+  const [reviewedItemIds, setReviewedItemIds] = useState({})
+  const [rateModal, setRateModal] = useState(null)
 
   const fetchOrders = async (isInitial = false) => {
     try {
@@ -52,11 +55,28 @@ const MyOrders = () => {
 
   }, [])
 
-  const toggleExpand = (orderId) => {
+  const toggleExpand = async (orderId) => {
+
+    const willExpand = !expandedOrders[orderId]
+
     setExpandedOrders((prev) => ({
       ...prev,
-      [orderId]: !prev[orderId]
+      [orderId]: willExpand
     }))
+
+    // expand hote waqt is order ke liye already-diye-gaye reviews check kar lo
+    if (willExpand && !reviewedItemIds[orderId]) {
+      try {
+        const result = await axios.get(
+          `${serverUrl}/api/review/my-reviews/${orderId}`,
+          { withCredentials: true }
+        )
+        const itemIds = result.data.map((r) => r.item)
+        setReviewedItemIds((prev) => ({ ...prev, [orderId]: itemIds }))
+      } catch (error) {
+        console.log(error)
+      }
+    }
   }
 
   const handleCopyOrderId = (orderId) => {
@@ -65,6 +85,13 @@ const MyOrders = () => {
     setTimeout(() => {
       setCopiedOrderId(null)
     }, 1500)
+  }
+
+  const handleReviewSuccess = (orderId, itemId) => {
+    setReviewedItemIds((prev) => ({
+      ...prev,
+      [orderId]: [...(prev[orderId] || []), itemId]
+    }))
   }
 
   return (
@@ -92,6 +119,7 @@ const MyOrders = () => {
                 {orders.map((order) => {
 
                   const isExpanded = !!expandedOrders[order._id]
+                  const reviewedIds = reviewedItemIds[order._id] || []
 
                   return (
                     <div
@@ -151,28 +179,52 @@ const MyOrders = () => {
                               </div>
 
                               <div className='flex flex-col gap-2'>
-                                {shopOrder.items.map((i) => (
-                                  <div key={i._id} className='flex items-center gap-3 text-xs sm:text-sm text-gray-600'>
-                                    {i.item?.image
-                                      ? (
-                                        <img
-                                          src={i.item.image}
-                                          alt={i.item?.name}
-                                          className='w-10 h-10 sm:w-12 sm:h-12 rounded-lg object-cover flex-shrink-0 border border-gray-200'
-                                        />
-                                      )
-                                      : (
-                                        <div className='w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-orange-50 flex items-center justify-center flex-shrink-0 border border-gray-200'>
-                                          <IoFastFoodOutline className='text-[#ff4d2d]' size={18} />
+                                {shopOrder.items.map((i) => {
+
+                                  const alreadyReviewed = reviewedIds.includes(i.item?._id)
+
+                                  return (
+                                    <div key={i._id} className='flex items-center gap-3 text-xs sm:text-sm text-gray-600'>
+                                      {i.item?.image
+                                        ? (
+                                          <img
+                                            src={i.item.image}
+                                            alt={i.item?.name}
+                                            className='w-10 h-10 sm:w-12 sm:h-12 rounded-lg object-cover flex-shrink-0 border border-gray-200'
+                                          />
+                                        )
+                                        : (
+                                          <div className='w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-orange-50 flex items-center justify-center flex-shrink-0 border border-gray-200'>
+                                            <IoFastFoodOutline className='text-[#ff4d2d]' size={18} />
+                                          </div>
+                                        )
+                                      }
+                                      <div className='flex-1 flex items-center justify-between'>
+                                        <p>{i.item?.name} x {i.quantity}</p>
+                                        <div className='flex items-center gap-2'>
+                                          <p>₹{(i.price * i.quantity).toFixed(2)}</p>
+                                          {shopOrder.status === "delivered" &&
+                                            (alreadyReviewed
+                                              ? (
+                                                <span className='flex items-center gap-1 text-[10px] sm:text-xs text-green-600 font-medium'>
+                                                  <FaStar size={10} /> Rated
+                                                </span>
+                                              )
+                                              : (
+                                                <button
+                                                  onClick={() => setRateModal({ item: i, orderId: order._id, shopOrderId: shopOrder._id })}
+                                                  className='text-[10px] sm:text-xs text-[#ff4d2d] font-medium border border-[#ff4d2d] px-2 py-1 rounded-full hover:bg-orange-50 transition-colors duration-200'
+                                                >
+                                                  Rate
+                                                </button>
+                                              )
+                                            )
+                                          }
                                         </div>
-                                      )
-                                    }
-                                    <div className='flex-1 flex items-center justify-between'>
-                                      <p>{i.item?.name} x {i.quantity}</p>
-                                      <p>₹{(i.price * i.quantity).toFixed(2)}</p>
+                                      </div>
                                     </div>
-                                  </div>
-                                ))}
+                                  )
+                                })}
                               </div>
 
                               {shopOrder.status === "out for delivery" && shopOrder.deliveryBoy &&
@@ -201,6 +253,17 @@ const MyOrders = () => {
         }
 
       </div>
+
+      {rateModal &&
+        <RateItemModal
+          item={rateModal.item}
+          orderId={rateModal.orderId}
+          shopOrderId={rateModal.shopOrderId}
+          onClose={() => setRateModal(null)}
+          onSuccess={(itemId) => handleReviewSuccess(rateModal.orderId, itemId)}
+        />
+      }
+
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { FaStar } from 'react-icons/fa'
+import { FaStar, FaRegStar } from 'react-icons/fa'
 import { FiShoppingCart } from 'react-icons/fi'
 import axios from 'axios'
 import { serverUrl } from '../App'
@@ -85,13 +85,11 @@ const UserItemCard = ({ item }) => {
 
         {/* Rating */}
         <div className='flex items-center gap-1 my-1'>
-          {[1, 2, 3, 4, 5].map((star) => (
-            <FaStar
-              key={star}
-              size={11}
-              className={star <= Math.round(ratingValue) ? 'text-yellow-400' : 'text-yellow-200'}
-            />
-          ))}
+          {[1, 2, 3, 4, 5].map((star) =>
+            star <= Math.round(ratingValue)
+              ? <FaStar key={star} size={15} className='text-yellow-400' />
+              : <FaRegStar key={star} size={15} className='text-yellow-400' />
+          )}
           <span className='text-[10px] sm:text-xs text-gray-500 ml-1'>
             ({ratingCount})
           </span>

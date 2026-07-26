@@ -12,6 +12,7 @@ import itemRouter from "./routes/item_routes.js"
 import cartRouter from "./routes/cart_routes.js"
 import orderRouter from "./routes/order_routes.js"
 import locationRouter from "./routes/location_routes.js"
+import reviewRouter from "./routes/review_routes.js"
 import { initSocket } from "./socket.js"
 
 const app = express()
@@ -31,6 +32,7 @@ app.use("/api/item", itemRouter)
 app.use("/api/cart", cartRouter)
 app.use("/api/order", orderRouter)
 app.use("/api/location", locationRouter)
+app.use("/api/review", reviewRouter)
 
 initSocket(server)
 
