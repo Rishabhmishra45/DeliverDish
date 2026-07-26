@@ -42,7 +42,7 @@ function useGetCity() {
                         `https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&format=json&apiKey=${apiKey}`
                     )
 
-                    console.log(result.data)
+                    // console.log(result.data)
 
                     const locationData = result?.data?.results?.[0]
 

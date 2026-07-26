@@ -86,7 +86,7 @@ function UserDashboard() {
 
             <Nav />
 
-            <div className='pt-[10px] px-4 sm:px-6 pb-10 max-w-7xl mx-auto flex flex-col gap-8'>
+            <div className='pt-[90px] px-4 sm:px-6 pb-10 max-w-7xl mx-auto flex flex-col gap-6 sm:gap-8'>
 
                 {!searchText &&
                     <div className='relative'>
@@ -153,7 +153,7 @@ function UserDashboard() {
 
                     ) : (
 
-                        <div className='flex gap-4 overflow-x-auto scrollbar-hide pb-2'>
+                        <div className='flex gap-3 sm:gap-4 overflow-x-auto scrollbar-hide pb-2'>
                             {filteredShops.map(shop => (
                                 <UserShopCard
                                     key={shop._id}
@@ -183,7 +183,7 @@ function UserDashboard() {
                     ) : (
 
                         <>
-                            <div className='grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5'>
+                            <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5'>
 
                                 {visibleItems.map(item => (
 
@@ -202,8 +202,9 @@ function UserDashboard() {
 
                                     <button
                                         onClick={() => setShowAllItems(!showAllItems)}
-                                        className='px-8 py-3 rounded-full
+                                        className='px-6 sm:px-8 py-2.5 sm:py-3 rounded-full
                                         bg-[#ff4d2d] text-white
+                                        text-sm sm:text-base
                                         font-semibold
                                         shadow-lg
                                         cursor-pointer

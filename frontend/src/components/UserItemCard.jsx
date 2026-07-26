@@ -59,7 +59,7 @@ const UserItemCard = ({ item }) => {
 
       <Toast toast={toast} />
 
-      <div className='relative w-full h-40'>
+      <div className='relative w-full h-32 sm:h-36 md:h-40'>
         <img
           src={item.image}
           alt={item.name}
@@ -77,18 +77,18 @@ const UserItemCard = ({ item }) => {
         </div>
       </div>
 
-      <div className='p-3 sm:p-4'>
+      <div className='p-2.5 sm:p-3 md:p-4'>
         {/* Item Name */}
-        <h4 className='text-sm sm:text-base font-bold text-gray-800 truncate'>
+        <h4 className='text-xs sm:text-sm md:text-base font-bold text-gray-800 truncate'>
           {item.name}
         </h4>
 
         {/* Rating */}
-        <div className='flex items-center gap-1 my-1'>
+        <div className='flex items-center gap-0.5 sm:gap-1 my-1 flex-wrap'>
           {[1, 2, 3, 4, 5].map((star) =>
             star <= Math.round(ratingValue)
-              ? <FaStar key={star} size={15} className='text-yellow-400' />
-              : <FaRegStar key={star} size={15} className='text-yellow-400' />
+              ? <FaStar key={star} size={12} className='text-yellow-400 sm:!w-[15px] sm:!h-[15px]' />
+              : <FaRegStar key={star} size={12} className='text-yellow-400 sm:!w-[15px] sm:!h-[15px]' />
           )}
           <span className='text-[10px] sm:text-xs text-gray-500 ml-1'>
             ({ratingCount})
@@ -96,26 +96,26 @@ const UserItemCard = ({ item }) => {
         </div>
 
         {/* Price and Quantity Controls */}
-        <div className='flex items-center justify-between mt-2'>
-          <p className='text-[#ff4d2d] font-semibold text-sm sm:text-base'>
+        <div className='flex items-center justify-between mt-2 gap-1'>
+          <p className='text-[#ff4d2d] font-semibold text-xs sm:text-sm md:text-base'>
             ₹{item.price}
           </p>
 
-          <div className='flex items-center gap-1.5 sm:gap-2'>
-            <div className='flex items-center gap-2 sm:gap-3 bg-gray-50 rounded-full px-2 sm:px-3 py-1 border border-gray-200'>
+          <div className='flex items-center gap-1 sm:gap-1.5 md:gap-2'>
+            <div className='flex items-center gap-1.5 sm:gap-2 md:gap-3 bg-gray-50 rounded-full px-1.5 sm:px-2 md:px-3 py-1 border border-gray-200'>
               <button
                 onClick={handleDecrease}
                 disabled={localQty === 0}
-                className='w-6 h-6 sm:w-7 sm:h-7 flex items-center cursor-pointer justify-center rounded-full bg-[#ff4d2d] text-white font-bold text-sm sm:text-base hover:bg-orange-700 transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed'
+                className='w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 flex items-center cursor-pointer justify-center rounded-full bg-[#ff4d2d] text-white font-bold text-xs sm:text-sm md:text-base hover:bg-orange-700 transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed'
               >
                 −
               </button>
-              <span className='text-sm sm:text-base font-semibold text-gray-800 min-w-[20px] text-center'>
+              <span className='text-xs sm:text-sm md:text-base font-semibold text-gray-800 min-w-[16px] sm:min-w-[20px] text-center'>
                 {localQty}
               </span>
               <button
                 onClick={handleIncrease}
-                className='w-6 h-6 sm:w-7 sm:h-7 flex items-center cursor-pointer justify-center rounded-full bg-[#ff4d2d] text-white font-bold text-sm sm:text-base hover:bg-orange-700 transition-colors duration-200'
+                className='w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 flex items-center cursor-pointer justify-center rounded-full bg-[#ff4d2d] text-white font-bold text-xs sm:text-sm md:text-base hover:bg-orange-700 transition-colors duration-200'
               >
                 +
               </button>
@@ -124,9 +124,9 @@ const UserItemCard = ({ item }) => {
             <button
               onClick={handleAddToCart}
               disabled={localQty === 0}
-              className='w-7 h-7 sm:w-8 sm:h-8 flex items-center cursor-pointer justify-center rounded-full bg-[#ff4d2d] text-white hover:bg-orange-700 transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed'
+              className='w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 flex items-center cursor-pointer justify-center rounded-full bg-[#ff4d2d] text-white hover:bg-orange-700 transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed flex-shrink-0'
             >
-              <FiShoppingCart size={14} />
+              <FiShoppingCart size={12} className='sm:!w-[14px] sm:!h-[14px]' />
             </button>
           </div>
         </div>

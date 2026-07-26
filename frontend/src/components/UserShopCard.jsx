@@ -8,9 +8,9 @@ const UserShopCard = ({ shop }) => {
   return (
     <div
       onClick={() => navigate(`/shop/${shop._id}`)}
-      className='flex-shrink-0 w-[160px] sm:w-[190px] cursor-pointer bg-white rounded-xl shadow-md border border-orange-100 overflow-hidden hover:shadow-lg transition-shadow duration-300'
+      className='flex-shrink-0 w-[150px] sm:w-[175px] md:w-[190px] cursor-pointer bg-white rounded-xl shadow-md border border-orange-100 overflow-hidden hover:shadow-lg transition-shadow duration-300'
     >
-      <div className='w-full h-[100px] sm:h-[120px] cursor-pointer'>
+      <div className='w-full h-[95px] sm:h-[110px] md:h-[120px] cursor-pointer'>
         <img
           src={shop.image}
           alt={shop.name}
