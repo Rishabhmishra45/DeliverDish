@@ -19,10 +19,22 @@ const app = express()
 const server = http.createServer(app)
 const port = process.env.PORT || 5000
 
+const allowedOrigins = [
+    "http://localhost:5173",
+    process.env.FRONTEND_URL
+];
+
 app.use(cors({
-    origin: "http://localhost:5173",
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
     credentials: true
-}))
+}));
+
 app.use(express.json())
 app.use(cookieParser())
 app.use("/api/auth", authRouter)

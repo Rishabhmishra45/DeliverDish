@@ -1,31 +1,45 @@
-import { Server } from "socket.io"
+import { Server } from "socket.io";
 
-let io
+let io;
 
 export const initSocket = (server) => {
+    const allowedOrigins = [
+        "http://localhost:5173",
+        process.env.FRONTEND_URL
+    ];
+
     io = new Server(server, {
         cors: {
-            origin: "http://localhost:5173",
+            origin: (origin, callback) => {
+                if (!origin || allowedOrigins.includes(origin)) {
+                    callback(null, true);
+                } else {
+                    callback(new Error("Not allowed by Socket.IO CORS"));
+                }
+            },
             credentials: true
         }
-    })
+    });
 
     io.on("connection", (socket) => {
 
-        // user apne order ke tracking room me join karta hai
+        // User apne order ke tracking room me join karta hai
         socket.on("joinTrackRoom", (shopOrderId) => {
-            socket.join(`track_${shopOrderId}`)
-        })
+            socket.join(`track_${shopOrderId}`);
+        });
 
-        // delivery boy apni current location us shopOrder ke room me broadcast karta hai
+        // Delivery boy apni current location broadcast karta hai
         socket.on("updateDeliveryLocation", ({ shopOrderId, latitude, longitude }) => {
-            io.to(`track_${shopOrderId}`).emit("deliveryLocationUpdate", { latitude, longitude })
-        })
+            io.to(`track_${shopOrderId}`).emit("deliveryLocationUpdate", {
+                latitude,
+                longitude
+            });
+        });
 
-        socket.on("disconnect", () => {})
-    })
+        socket.on("disconnect", () => {});
+    });
 
-    return io
-}
+    return io;
+};
 
-export const getIo = () => io
+export const getIo = () => io;

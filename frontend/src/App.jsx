@@ -22,7 +22,7 @@ import OwnerOrders from './pages/OwnerOrders'
 import DeliveryBoy from './pages/DeliveryBoy'
 import TrackOrder from './pages/TrackOrder'
 
-export const serverUrl = "http://localhost:8000"
+export const serverUrl = import.meta.env.VITE_API_URL;
 
 const App = () => {
 
