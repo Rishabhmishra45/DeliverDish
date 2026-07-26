@@ -3,10 +3,16 @@ import bcrypt from "bcryptjs";
 import genToken from "../utils/token.js";
 import { sendOtpMail } from "../utils/mail.js";
 
+// Reusable cookie options
+const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+};
+
 export const signUp = async (req, res) => {
-
     try {
-
         const {
             fullName,
             email,
@@ -25,7 +31,7 @@ export const signUp = async (req, res) => {
 
         if (user) {
             return res.status(400).json({
-                message: "User Already exist."
+                message: "User already exists."
             });
         }
 
@@ -53,29 +59,21 @@ export const signUp = async (req, res) => {
 
         const token = await genToken(user._id);
 
-        res.cookie("token", token, {
-            secure: false,
-            sameSite: "strict",
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-            httpOnly: true
-        });
+        res.cookie("token", token, cookieOptions);
 
         return res.status(201).json(user);
 
     } catch (error) {
-
         console.log(error);
 
         return res.status(500).json({
-            message: `sign up error ${error.message}`
+            message: `Sign up error: ${error.message}`
         });
     }
 };
 
 export const signIn = async (req, res) => {
-
     try {
-
         const { email, password } = req.body;
 
         if (!email || !password) {
@@ -88,7 +86,7 @@ export const signIn = async (req, res) => {
 
         if (!user) {
             return res.status(400).json({
-                message: "User does not exists."
+                message: "User does not exist."
             });
         }
 
@@ -96,65 +94,68 @@ export const signIn = async (req, res) => {
 
         if (!isMatch) {
             return res.status(400).json({
-                message: "Incorrect Password"
+                message: "Incorrect password."
             });
         }
 
         const token = await genToken(user._id);
 
-        res.cookie("token", token, {
-            secure: false,
-            sameSite: "strict",
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-            httpOnly: true
-        });
+        res.cookie("token", token, cookieOptions);
 
         return res.status(200).json(user);
 
     } catch (error) {
-
         console.log(error);
 
         return res.status(500).json({
-            message: `sign in error ${error.message}`
+            message: `Sign in error: ${error.message}`
         });
     }
 };
 
 export const signOut = async (req, res) => {
-
     try {
-
-        res.clearCookie("token");
+        res.clearCookie("token", cookieOptions);
 
         return res.status(200).json({
-            message: "Logout successfully"
+            message: "Logout successful"
         });
 
     } catch (error) {
-
         console.log(error);
 
         return res.status(500).json({
-            message: `sign out error ${error.message}`
+            message: `Sign out error: ${error.message}`
         });
     }
 };
 
 export const sendOtp = async (req, res) => {
     try {
-        const { email } = req.body
-        const user = await User.findOne({ email })
+        const { email } = req.body;
+
+        const user = await User.findOne({ email });
+
         if (!user) {
-            return res.status(400).json({ message: "User does not exist." })
+            return res.status(400).json({
+                message: "User does not exist."
+            });
         }
-        const otp = Math.floor(1000 + Math.random() * 9000).toString()
-        user.resetOtp = otp
-        user.otpExpires = Date.now() + 5 * 60 * 1000
-        user.isOtpVerified = false
-        await user.save()
-        await sendOtpMail(email, otp)
-        return res.status(200).json({ message: "otp sent successfully" })
+
+        const otp = Math.floor(1000 + Math.random() * 9000).toString();
+
+        user.resetOtp = otp;
+        user.otpExpires = Date.now() + 5 * 60 * 1000;
+        user.isOtpVerified = false;
+
+        await user.save();
+
+        await sendOtpMail(email, otp);
+
+        return res.status(200).json({
+            message: "OTP sent successfully."
+        });
+
     } catch (error) {
         console.log("SEND OTP ERROR =>", error);
 
@@ -162,83 +163,102 @@ export const sendOtp = async (req, res) => {
             message: error.message
         });
     }
-}
+};
 
 export const verifyOtp = async (req, res) => {
     try {
-        const { email, otp } = req.body
-        const user = await User.findOne({ email })
-        if (!user || user.resetOtp != otp || user.otpExpires < Date.now()) {
-            return res.status(400).json({ message: "invalid/expired otp" })
-        }
-        user.isOtpVerified = true
-        user.resetOtp = undefined
-        user.otpExpires = undefined
-        await user.save()
-        return res.status(200).json({ message: "otp verify successfully" })
-    } catch (error) {
-        return res.status(500).json(`verify otp error ${error}`)
-    }
-}
+        const { email, otp } = req.body;
 
+        const user = await User.findOne({ email });
+
+        if (!user || user.resetOtp != otp || user.otpExpires < Date.now()) {
+            return res.status(400).json({
+                message: "Invalid or expired OTP."
+            });
+        }
+
+        user.isOtpVerified = true;
+        user.resetOtp = undefined;
+        user.otpExpires = undefined;
+
+        await user.save();
+
+        return res.status(200).json({
+            message: "OTP verified successfully."
+        });
+
+    } catch (error) {
+        console.log(error);
+
+        return res.status(500).json({
+            message: error.message
+        });
+    }
+};
 
 export const resetPassword = async (req, res) => {
     try {
-        const { email, newPassword } = req.body
-        const user = await User.findOne({ email })
+        const { email, newPassword } = req.body;
+
+        const user = await User.findOne({ email });
+
         if (!user || !user.isOtpVerified) {
-            return res.status(400).json({ message: "otp verification required" })
+            return res.status(400).json({
+                message: "OTP verification required."
+            });
         }
-        const hashedPassword = await bcrypt.hash(newPassword, 10)
-        user.password = hashedPassword
-        user.isOtpVerified = false
-        await user.save()
-        return res.status(200).json({ message: "password reset successfully" })
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        user.password = hashedPassword;
+        user.isOtpVerified = false;
+
+        await user.save();
+
+        return res.status(200).json({
+            message: "Password reset successfully."
+        });
+
     } catch (error) {
-        return res.status(500).json(`reset password error ${error}`)
+        console.log(error);
+
+        return res.status(500).json({
+            message: error.message
+        });
     }
-}
+};
 
 export const googleAuth = async (req, res) => {
-
     try {
-
         const {
             fullName,
             email,
             mobile,
             role
-        } = req.body
+        } = req.body;
 
-        let user = await User.findOne({ email })
+        let user = await User.findOne({ email });
 
         if (!user) {
-
             user = await User.create({
                 fullName,
                 email,
                 mobile,
                 role
-            })
+            });
         }
 
-        const token = await genToken(user._id)
+        const token = await genToken(user._id);
 
-        res.cookie("token", token, {
-            secure: false,
-            sameSite: "strict",
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-            httpOnly: true
-        })
+        res.cookie("token", token, cookieOptions);
 
-        return res.status(200).json(user)
+        return res.status(200).json(user);
 
     } catch (error) {
-
-        console.log("GOOGLE AUTH ERROR =>", error)
+        console.log("GOOGLE AUTH ERROR =>", error);
 
         return res.status(500).json({
             message: error.message
-        })
+        });
     }
-}
+};
