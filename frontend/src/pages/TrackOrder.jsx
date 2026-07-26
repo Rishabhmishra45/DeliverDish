@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { serverUrl } from '../App'
@@ -7,12 +7,21 @@ import { IoIosArrowRoundBack } from 'react-icons/io'
 import { MapContainer, TileLayer, Marker, Polyline, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import scooterIcon from '../assets/scooter.png'
+import homeIcon from '../assets/home.png'
 
-delete L.Icon.Default.prototype._getIconUrl
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png'
+const scooterMarker = new L.Icon({
+  iconUrl: scooterIcon,
+  iconSize: [40, 40],
+  iconAnchor: [20, 20],
+  popupAnchor: [0, -20]
+})
+
+const homeMarker = new L.Icon({
+  iconUrl: homeIcon,
+  iconSize: [36, 36],
+  iconAnchor: [18, 18],
+  popupAnchor: [0, -18]
 })
 
 const FitBounds = ({ points }) => {
@@ -148,8 +157,8 @@ const TrackOrder = () => {
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                   attribution='&copy; OpenStreetMap contributors'
                 />
-                <Marker position={[boyLocation.latitude, boyLocation.longitude]} />
-                <Marker position={[customerLat, customerLon]} />
+                <Marker position={[boyLocation.latitude, boyLocation.longitude]} icon={scooterMarker} />
+                <Marker position={[customerLat, customerLon]} icon={homeMarker} />
                 {points.length === 2 &&
                   <Polyline positions={points} pathOptions={{ color: "#2563eb", weight: 4 }} />
                 }

@@ -8,15 +8,24 @@ import { IoFastFoodOutline } from 'react-icons/io5'
 import { FaPhone, FaLocationDot } from 'react-icons/fa6'
 import { MdSpaceDashboard, MdCheckCircle, MdBarChart } from 'react-icons/md'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import scooterIcon from '../assets/scooter.png'
+import homeIcon from '../assets/home.png'
 
-delete L.Icon.Default.prototype._getIconUrl
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png'
+const scooterMarker = new L.Icon({
+  iconUrl: scooterIcon,
+  iconSize: [40, 40],
+  iconAnchor: [20, 20],
+  popupAnchor: [0, -20]
+})
+
+const homeMarker = new L.Icon({
+  iconUrl: homeIcon,
+  iconSize: [36, 36],
+  iconAnchor: [18, 18],
+  popupAnchor: [0, -18]
 })
 
 const RecenterMap = ({ latitude, longitude }) => {
@@ -197,92 +206,105 @@ const DeliveryBoy = () => {
 
   }, [pastDeliveries])
 
-  const renderOrderCard = (order, actionButton, showMap = false) => (
-    <div
-      key={order.shopOrder._id}
-      className='bg-white rounded-2xl shadow-md border border-orange-100 p-4 sm:p-5'
-    >
-      <div className='flex items-center justify-between mb-2'>
-        <p className='text-sm sm:text-base font-semibold text-gray-800'>
-          {order.shopOrder.shop?.name}
-        </p>
-        <p className='text-xs sm:text-sm text-gray-500'>
-          {new Date(order.createdAt).toLocaleDateString("en-IN", {
-            day: "numeric", month: "short"
-          })}
-        </p>
-      </div>
+  const renderOrderCard = (order, actionButton, showMap = false) => {
 
-      <div className='flex items-center justify-between mb-3'>
-        <p className='text-sm text-gray-700'>{order.user?.fullName}</p>
-        {order.user?.mobile && (
-          <a
-            href={`tel:${order.user.mobile}`}
-            className='flex items-center gap-1.5 text-xs sm:text-sm text-[#ff4d2d] hover:underline'
-          >
-            <FaPhone size={11} />
-            {order.user.mobile}
-          </a>
-        )}
-      </div>
+    const customerLat = order.deliveryAddress?.latitude
+    const customerLon = order.deliveryAddress?.longitude
 
-      <div className='flex items-start gap-1.5 mb-3 text-xs sm:text-sm text-gray-600'>
-        <FaLocationDot size={13} className='text-[#ff4d2d] mt-0.5 flex-shrink-0' />
-        <p>{order.deliveryAddress?.text}</p>
-      </div>
+    const points = coords.latitude && customerLat
+      ? [[coords.latitude, coords.longitude], [customerLat, customerLon]]
+      : []
 
-      {showMap && coords.latitude && order.deliveryAddress?.latitude && (
-        <div className='w-full h-[200px] sm:h-[220px] rounded-lg overflow-hidden mb-3 border border-gray-200'>
-          <MapContainer
-            center={[coords.latitude, coords.longitude]}
-            zoom={14}
-            style={{ height: "100%", width: "100%" }}
-          >
-            <TileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution='&copy; OpenStreetMap contributors'
-            />
-            <Marker position={[coords.latitude, coords.longitude]}>
-              <Popup>You (Delivery Partner)</Popup>
-            </Marker>
-            <Marker position={[order.deliveryAddress.latitude, order.deliveryAddress.longitude]}>
-              <Popup>Customer's delivery address</Popup>
-            </Marker>
-            <RecenterMap latitude={coords.latitude} longitude={coords.longitude} />
-          </MapContainer>
+    return (
+      <div
+        key={order.shopOrder._id}
+        className='bg-white rounded-2xl shadow-md border border-orange-100 p-4 sm:p-5'
+      >
+        <div className='flex items-center justify-between mb-2'>
+          <p className='text-sm sm:text-base font-semibold text-gray-800'>
+            {order.shopOrder.shop?.name}
+          </p>
+          <p className='text-xs sm:text-sm text-gray-500'>
+            {new Date(order.createdAt).toLocaleDateString("en-IN", {
+              day: "numeric", month: "short"
+            })}
+          </p>
         </div>
-      )}
 
-      <div className='border-t border-gray-100 pt-3 flex flex-col gap-2'>
-        {order.shopOrder.items.map((i, idx) => (
-          <div key={i._id || idx} className='flex items-center gap-3 text-xs sm:text-sm text-gray-600'>
-            {i.item?.image
-              ? (
-                <img
-                  src={i.item.image}
-                  alt={i.item?.name}
-                  className='w-9 h-9 sm:w-10 sm:h-10 rounded-lg object-cover flex-shrink-0 border border-gray-200'
-                />
-              )
-              : (
-                <div className='w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-orange-50 flex items-center justify-center flex-shrink-0 border border-gray-200'>
-                  <IoFastFoodOutline className='text-[#ff4d2d]' size={16} />
-                </div>
-              )
-            }
-            <p>{i.item?.name} x {i.quantity}</p>
+        <div className='flex items-center justify-between mb-3'>
+          <p className='text-sm text-gray-700'>{order.user?.fullName}</p>
+          {order.user?.mobile && (
+            <a
+              href={`tel:${order.user.mobile}`}
+              className='flex items-center gap-1.5 text-xs sm:text-sm text-[#ff4d2d] hover:underline'
+            >
+              <FaPhone size={11} />
+              {order.user.mobile}
+            </a>
+          )}
+        </div>
+
+        <div className='flex items-start gap-1.5 mb-3 text-xs sm:text-sm text-gray-600'>
+          <FaLocationDot size={13} className='text-[#ff4d2d] mt-0.5 flex-shrink-0' />
+          <p>{order.deliveryAddress?.text}</p>
+        </div>
+
+        {showMap && coords.latitude && customerLat && (
+          <div className='w-full h-[200px] sm:h-[220px] rounded-lg overflow-hidden mb-3 border border-gray-200'>
+            <MapContainer
+              center={[coords.latitude, coords.longitude]}
+              zoom={14}
+              style={{ height: "100%", width: "100%" }}
+            >
+              <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; OpenStreetMap contributors'
+              />
+              <Marker position={[coords.latitude, coords.longitude]} icon={scooterMarker}>
+                <Popup>You (Delivery Partner)</Popup>
+              </Marker>
+              <Marker position={[customerLat, customerLon]} icon={homeMarker}>
+                <Popup>Customer's delivery address</Popup>
+              </Marker>
+              {points.length === 2 &&
+                <Polyline positions={points} pathOptions={{ color: "#2563eb", weight: 4 }} />
+              }
+              <RecenterMap latitude={coords.latitude} longitude={coords.longitude} />
+            </MapContainer>
           </div>
-        ))}
-      </div>
+        )}
 
-      <div className='border-t border-gray-200 mt-3 pt-3 flex items-center justify-between'>
-        <p className='text-sm font-semibold text-gray-800'>Subtotal</p>
-        <p className='text-sm font-bold text-[#ff4d2d]'>₹{order.shopOrder.subtotal?.toFixed(2)}</p>
-      </div>
+        <div className='border-t border-gray-100 pt-3 flex flex-col gap-2'>
+          {order.shopOrder.items.map((i, idx) => (
+            <div key={i._id || idx} className='flex items-center gap-3 text-xs sm:text-sm text-gray-600'>
+              {i.item?.image
+                ? (
+                  <img
+                    src={i.item.image}
+                    alt={i.item?.name}
+                    className='w-9 h-9 sm:w-10 sm:h-10 rounded-lg object-cover flex-shrink-0 border border-gray-200'
+                  />
+                )
+                : (
+                  <div className='w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-orange-50 flex items-center justify-center flex-shrink-0 border border-gray-200'>
+                    <IoFastFoodOutline className='text-[#ff4d2d]' size={16} />
+                  </div>
+                )
+              }
+              <p>{i.item?.name} x {i.quantity}</p>
+            </div>
+          ))}
+        </div>
 
-      {actionButton}
-    </div>
-  )
+        <div className='border-t border-gray-200 mt-3 pt-3 flex items-center justify-between'>
+          <p className='text-sm font-semibold text-gray-800'>Subtotal</p>
+          <p className='text-sm font-bold text-[#ff4d2d]'>₹{order.shopOrder.subtotal?.toFixed(2)}</p>
+        </div>
+
+        {actionButton}
+      </div>
+    )
+  }
 
   return (
     <div className='min-h-screen bg-[#fff9f6]'>
