@@ -1,6 +1,5 @@
 import { io } from "socket.io-client";
-import { serverUrl } from "./App";
 
-export const socket = io(serverUrl, {
+export const socket = io(import.meta.env.VITE_API_URL, {
     withCredentials: true
 });
