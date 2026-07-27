@@ -9,6 +9,7 @@ import { serverUrl } from '../App'
 import { setUserData } from '../redux/userSlice'
 import { setSearchText } from '../redux/searchSlice'
 import { useNavigate } from 'react-router-dom'
+import LocationPicker from './LocationPicker'
 
 function Nav() {
 
@@ -18,6 +19,7 @@ function Nav() {
     const { cartItems } = useSelector(state => state.cart)
     const [isSearchOpen, setIsSearchOpen] = useState(false)
     const [isProfileOpen, setIsProfileOpen] = useState(false)
+    const [isLocationOpen, setIsLocationOpen] = useState(false)
     const navigate = useNavigate()
     const dispatch = useDispatch()
     const isOwner = userData?.role === "owner"
@@ -86,12 +88,15 @@ function Nav() {
 
                             {
                                 !isOwner &&
-                                <div className='flex items-center w-[200px] gap-2 px-3 border-r border-gray-300'>
-                                    <FaLocationDot size={18} className='text-[#ff4d2d]' />
-                                    <span className='truncate text-gray-600'>
+                                <button
+                                    onClick={() => setIsLocationOpen(true)}
+                                    className='flex items-center w-[200px] gap-2 px-3 border-r border-gray-300 cursor-pointer hover:bg-gray-50 transition-colors duration-200'
+                                >
+                                    <FaLocationDot size={18} className='text-[#ff4d2d] flex-shrink-0' />
+                                    <span className='truncate text-gray-600 text-left'>
                                         {city || "Select Location"}
                                     </span>
-                                </div>
+                                </button>
                             }
 
                             <div className='flex items-center flex-1 px-3 gap-2'>
@@ -123,12 +128,15 @@ function Nav() {
                         {/* Mobile Location */}
                         {
                             !isOwner && !isDeliveryBoy &&
-                            <div className='flex items-center gap-2 md:hidden'>
+                            <button
+                                onClick={() => setIsLocationOpen(true)}
+                                className='flex items-center gap-2 md:hidden cursor-pointer'
+                            >
                                 <FaLocationDot size={18} className='text-[#ff4d2d]' />
                                 <span className='text-sm text-gray-600'>
                                     {city || "Location"}
                                 </span>
-                            </div>
+                            </button>
                         }
 
                         {/* Mobile Search */}
@@ -260,14 +268,25 @@ function Nav() {
 
                     {/* Modal Location */}
                     {!isOwner &&
-                        <div className='flex items-center gap-2 p-4 border-b border-gray-100 bg-gray-50'>
+                        <button
+                            onClick={() => {
+                                setIsSearchOpen(false)
+                                setIsLocationOpen(true)
+                            }}
+                            className='w-full flex items-center gap-2 p-4 border-b border-gray-100 bg-gray-50 cursor-pointer'
+                        >
                             <FaLocationDot size={18} className='text-[#ff4d2d]' />
-                            <span className='text-gray-700'>{city}</span>
-                        </div>
+                            <span className='text-gray-700'>{city || "Select Location"}</span>
+                        </button>
                     }
 
                 </div>
             )}
+
+            {/* Location Picker Modal */}
+            {isLocationOpen && !isOwner && !isDeliveryBoy &&
+                <LocationPicker onClose={() => setIsLocationOpen(false)} />
+            }
         </>
     )
 }

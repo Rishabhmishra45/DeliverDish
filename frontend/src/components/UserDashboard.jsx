@@ -6,6 +6,7 @@ import { categories } from '../category'
 import CategoryCard from './CategoryCard'
 import UserShopCard from './UserShopCard'
 import UserItemCard from './UserItemCard'
+import Footer from './Footer'
 
 function UserDashboard() {
 
@@ -229,7 +230,7 @@ function UserDashboard() {
                 </div>
 
             </div>
-
+            <Footer />
         </div>
     )
 }

@@ -21,6 +21,7 @@ import MyOrders from './pages/MyOrders'
 import OwnerOrders from './pages/OwnerOrders'
 import DeliveryBoy from './pages/DeliveryBoy'
 import TrackOrder from './pages/TrackOrder'
+import AboutUs from './pages/AboutUs'
 
 export const serverUrl = import.meta.env.VITE_API_URL;
 
@@ -59,6 +60,7 @@ const App = () => {
       <Route path='/owner-orders' element={userData ? <OwnerOrders /> : <Navigate to={"/signin"} />} />
       <Route path='/delivery-dashboard' element={userData ? <DeliveryBoy /> : <Navigate to={"/signin"} />} />
       <Route path='/track-order/:orderId/:shopOrderId' element={userData ? <TrackOrder /> : <Navigate to={"/signin"} />} />
+      <Route path='/about' element={<AboutUs />} />
     </Routes>
   )
 }

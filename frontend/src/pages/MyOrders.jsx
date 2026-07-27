@@ -6,6 +6,7 @@ import RateItemModal from '../components/RateItemModal'
 import { useNavigate } from 'react-router-dom'
 import { FaChevronDown, FaChevronUp, FaRegCopy, FaCheck, FaStar } from 'react-icons/fa6'
 import { IoFastFoodOutline } from 'react-icons/io5'
+import { IoIosArrowRoundBack } from 'react-icons/io'
 
 const statusColors = {
   pending: "bg-yellow-100 text-yellow-700",
@@ -100,9 +101,14 @@ const MyOrders = () => {
 
       <div className='pt-[90px] px-4 sm:px-6 pb-10 max-w-3xl mx-auto'>
 
-        <h1 className='text-xl sm:text-2xl font-bold text-gray-800 mb-6'>
-          My Orders
-        </h1>
+        <div className='flex items-center gap-3 mb-6'>
+          <button onClick={() => navigate(-1)} className='cursor-pointer'>
+            <IoIosArrowRoundBack size={30} className='text-[#ff4d2d]' />
+          </button>
+          <h1 className='text-xl sm:text-2xl font-bold text-gray-800'>
+            My Orders
+          </h1>
+        </div>
 
         {loading
           ? (
