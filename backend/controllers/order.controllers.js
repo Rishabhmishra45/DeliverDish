@@ -8,6 +8,13 @@ import { getDistanceKm } from "../utils/distance.js"
 const DELIVERY_FEE = 40
 const MAX_RADIUS_KM = 10
 
+const BASE_PAY_PER_ORDER = 35
+const MILESTONE_BONUS = 300
+const MILESTONE_SIZE = 20
+const NIGHT_BONUS = 20
+const NIGHT_START_HOUR = 23 // 11 PM
+const NIGHT_END_HOUR = 6    // 6 AM
+
 export const placeOrder = async (req, res) => {
     try {
         const { paymentMethod, deliveryAddress } = req.body
@@ -432,6 +439,7 @@ export const markDelivered = async (req, res) => {
 
         shopOrder.status = "delivered"
         shopOrder.deliveryBoyStatus = "delivered"
+        shopOrder.deliveredAt = new Date()
 
         if (order.paymentMethod === "cod") {
             order.paymentStatus = "paid"
@@ -446,7 +454,6 @@ export const markDelivered = async (req, res) => {
 }
 
 
-// user ke liye: shop info, items, delivery boy details, aur delivery address — Track Order page ke liye
 export const trackOrder = async (req, res) => {
     try {
         const { orderId, shopOrderId } = req.params
@@ -488,5 +495,108 @@ export const trackOrder = async (req, res) => {
 
     } catch (error) {
         return res.status(500).json({ message: `track order error ${error}` })
+    }
+}
+
+
+// customer delivered order pe tip de sakta hai — sirf ek baar
+export const addTip = async (req, res) => {
+    try {
+        const { orderId, shopOrderId } = req.params
+        const { tip } = req.body
+
+        if (!tip || tip <= 0) {
+            return res.status(400).json({ message: "tip amount must be greater than 0" })
+        }
+
+        const order = await Order.findById(orderId)
+        if (!order) {
+            return res.status(400).json({ message: "order not found" })
+        }
+
+        if (order.user.toString() !== req.userId) {
+            return res.status(403).json({ message: "not authorized for this order" })
+        }
+
+        const shopOrder = order.shopOrders.id(shopOrderId)
+        if (!shopOrder) {
+            return res.status(400).json({ message: "shop order not found" })
+        }
+
+        if (shopOrder.status !== "delivered") {
+            return res.status(400).json({ message: "you can only tip after delivery" })
+        }
+
+        if (shopOrder.tip > 0) {
+            return res.status(400).json({ message: "you have already tipped for this order" })
+        }
+
+        shopOrder.tip = tip
+        await order.save()
+
+        return res.status(200).json({ message: "tip added", tip: shopOrder.tip })
+
+    } catch (error) {
+        return res.status(500).json({ message: `add tip error ${error}` })
+    }
+}
+
+
+// delivery boy ki earnings — base pay, night bonus, milestone bonus, tips (today / this month / all-time)
+export const getMyEarnings = async (req, res) => {
+    try {
+
+        const orders = await Order.find({ "shopOrders.deliveryBoy": req.userId })
+
+        // saare delivered shopOrders (jo is delivery boy ne kiye) ek flat list me nikalo
+        const deliveredShopOrders = []
+
+        for (const order of orders) {
+            for (const so of order.shopOrders) {
+                if (so.deliveryBoy?.toString() === req.userId && so.status === "delivered" && so.deliveredAt) {
+                    deliveredShopOrders.push(so)
+                }
+            }
+        }
+
+        const isNight = (date) => {
+            const hour = date.getHours()
+            return hour >= NIGHT_START_HOUR || hour < NIGHT_END_HOUR
+        }
+
+        const calculateEarnings = (list) => {
+            const totalOrders = list.length
+            const basePay = totalOrders * BASE_PAY_PER_ORDER
+            const nightOrders = list.filter((so) => isNight(new Date(so.deliveredAt))).length
+            const nightBonus = nightOrders * NIGHT_BONUS
+            const milestoneBonus = Math.floor(totalOrders / MILESTONE_SIZE) * MILESTONE_BONUS
+            const tips = list.reduce((sum, so) => sum + (so.tip || 0), 0)
+            const total = basePay + nightBonus + milestoneBonus + tips
+
+            return { totalOrders, basePay, nightBonus, milestoneBonus, tips, total }
+        }
+
+        const now = new Date()
+        const todayStr = now.toDateString()
+        const currentMonth = now.getMonth()
+        const currentYear = now.getFullYear()
+
+        const todayOrders = deliveredShopOrders.filter(
+            (so) => new Date(so.deliveredAt).toDateString() === todayStr
+        )
+
+        const monthOrders = deliveredShopOrders.filter((so) => {
+            const d = new Date(so.deliveredAt)
+            return d.getMonth() === currentMonth && d.getFullYear() === currentYear
+        })
+
+        return res.status(200).json({
+            today: calculateEarnings(todayOrders),
+            thisMonth: calculateEarnings(monthOrders),
+            allTime: calculateEarnings(deliveredShopOrders)
+        })
+
+    } catch (error) {
+        return res.status(500).json({ message: `get my earnings error ${error}` })
     }
 }

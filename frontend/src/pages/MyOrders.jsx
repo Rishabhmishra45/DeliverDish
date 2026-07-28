@@ -16,6 +16,13 @@ const statusColors = {
   cancelled: "bg-red-100 text-red-700"
 }
 
+const formatDateTime = (dateStr) => {
+  return new Date(dateStr).toLocaleString("en-IN", {
+    day: "numeric", month: "short", year: "numeric",
+    hour: "numeric", minute: "2-digit", hour12: true
+  })
+}
+
 const MyOrders = () => {
 
   const navigate = useNavigate()
@@ -26,6 +33,8 @@ const MyOrders = () => {
   const [copiedOrderId, setCopiedOrderId] = useState(null)
   const [reviewedItemIds, setReviewedItemIds] = useState({})
   const [rateModal, setRateModal] = useState(null)
+  const [tipInputs, setTipInputs] = useState({})
+  const [tippingId, setTippingId] = useState(null)
 
   const fetchOrders = async (isInitial = false) => {
     try {
@@ -95,6 +104,34 @@ const MyOrders = () => {
     }))
   }
 
+  const handleTipChange = (shopOrderId, value) => {
+    setTipInputs((prev) => ({ ...prev, [shopOrderId]: value }))
+  }
+
+  const handleSendTip = async (orderId, shopOrderId) => {
+
+    const amount = Number(tipInputs[shopOrderId])
+    if (!amount || amount <= 0) return
+
+    setTippingId(shopOrderId)
+
+    try {
+
+      await axios.post(
+        `${serverUrl}/api/order/add-tip/${orderId}/${shopOrderId}`,
+        { tip: amount },
+        { withCredentials: true }
+      )
+
+      fetchOrders(false)
+
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setTippingId(null)
+    }
+  }
+
   return (
     <div className='min-h-screen bg-[#fff9f6]'>
       <Nav />
@@ -134,9 +171,7 @@ const MyOrders = () => {
                     >
                       <div className='flex items-center justify-between mb-1 flex-wrap gap-2'>
                         <p className='text-xs sm:text-sm text-gray-500'>
-                          {new Date(order.createdAt).toLocaleDateString("en-IN", {
-                            day: "numeric", month: "short", year: "numeric"
-                          })}
+                          {formatDateTime(order.createdAt)}
                         </p>
                         <p className='text-xs sm:text-sm font-medium text-gray-700'>
                           {order.paymentMethod === "cod" ? "Cash on Delivery" : "Paid Online"}
@@ -183,6 +218,12 @@ const MyOrders = () => {
                                   {shopOrder.status}
                                 </span>
                               </div>
+
+                              {shopOrder.status === "delivered" && shopOrder.deliveredAt &&
+                                <p className='text-[10px] sm:text-xs text-gray-400 mb-2'>
+                                  Delivered on {formatDateTime(shopOrder.deliveredAt)}
+                                </p>
+                              }
 
                               <div className='flex flex-col gap-2'>
                                 {shopOrder.items.map((i) => {
@@ -232,6 +273,35 @@ const MyOrders = () => {
                                   )
                                 })}
                               </div>
+
+                              {shopOrder.status === "delivered" &&
+                                (shopOrder.tip > 0
+                                  ? (
+                                    <p className='mt-3 text-xs sm:text-sm text-green-600 font-medium'>
+                                      You tipped ₹{shopOrder.tip} to the delivery partner 🎉
+                                    </p>
+                                  )
+                                  : (
+                                    <div className='mt-3 flex items-center gap-2'>
+                                      <input
+                                        type="number"
+                                        min={1}
+                                        placeholder='Tip amount (₹)'
+                                        value={tipInputs[shopOrder._id] || ""}
+                                        onChange={(e) => handleTipChange(shopOrder._id, e.target.value)}
+                                        className='flex-1 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:border-[#ff4d2d] text-sm'
+                                      />
+                                      <button
+                                        onClick={() => handleSendTip(order._id, shopOrder._id)}
+                                        disabled={tippingId === shopOrder._id}
+                                        className='px-4 py-2 bg-[#ff4d2d] text-white text-xs sm:text-sm font-medium rounded-lg hover:bg-orange-600 transition-colors duration-200 disabled:opacity-60'
+                                      >
+                                        {tippingId === shopOrder._id ? "Sending..." : "Send Tip"}
+                                      </button>
+                                    </div>
+                                  )
+                                )
+                              }
 
                               {shopOrder.status === "out for delivery" && shopOrder.deliveryBoy &&
                                 <button

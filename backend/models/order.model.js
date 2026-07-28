@@ -50,6 +50,14 @@ const shopOrderSchema = new mongoose.Schema({
         type: String,
         enum: ["notAssigned", "broadcasted", "assigned", "delivered"],
         default: "notAssigned"
+    },
+    deliveredAt: {
+        type: Date,
+        default: null
+    },
+    tip: {
+        type: Number,
+        default: 0
     }
 })
  

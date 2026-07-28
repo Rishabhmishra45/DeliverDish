@@ -11,7 +11,9 @@ import {
     getMyDeliveries,
     acceptOrder,
     markDelivered,
-    trackOrder
+    trackOrder,
+    addTip,
+    getMyEarnings
 } from "../controllers/order.controllers.js"
 
 const orderRouter = express.Router()
@@ -27,5 +29,7 @@ orderRouter.get("/my-deliveries", isAuth, getMyDeliveries)
 orderRouter.post("/accept-order/:orderId/:shopOrderId", isAuth, acceptOrder)
 orderRouter.post("/mark-delivered/:orderId/:shopOrderId", isAuth, markDelivered)
 orderRouter.get("/track-order/:orderId/:shopOrderId", isAuth, trackOrder)
+orderRouter.post("/add-tip/:orderId/:shopOrderId", isAuth, addTip)
+orderRouter.get("/my-earnings", isAuth, getMyEarnings)
 
 export default orderRouter

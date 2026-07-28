@@ -1,5 +1,5 @@
 import React from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { FaFacebookF, FaInstagram, FaTwitter, FaLinkedinIn } from 'react-icons/fa6'
 import { MdEmail, MdPhone, MdLocationOn } from 'react-icons/md'
 
@@ -65,24 +65,24 @@ const Footer = () => {
                         </h3>
                         <ul className='flex flex-col gap-2 sm:gap-2.5'>
                             <li>
-                                <a href="/about" className='text-gray-500 text-xs sm:text-sm hover:text-[#ff4d2d] transition-colors duration-200'>
+                                <Link to="/about" className='text-gray-500 text-xs sm:text-sm hover:text-[#ff4d2d] transition-colors duration-200'>
                                     About Us
-                                </a>
+                                </Link>
                             </li>
                             <li>
-                                <a href="#" className='text-gray-500 text-xs sm:text-sm hover:text-[#ff4d2d] transition-colors duration-200'>
+                                <Link to="/" className='text-gray-500 text-xs sm:text-sm hover:text-[#ff4d2d] transition-colors duration-200'>
                                     Careers
-                                </a>
+                                </Link>
                             </li>
                             <li>
-                                <a href="#" className='text-gray-500 text-xs sm:text-sm hover:text-[#ff4d2d] transition-colors duration-200'>
+                                <Link to="/" className='text-gray-500 text-xs sm:text-sm hover:text-[#ff4d2d] transition-colors duration-200'>
                                     Blog
-                                </a>
+                                </Link>
                             </li>
                             <li>
-                                <a href="#" className='text-gray-500 text-xs sm:text-sm hover:text-[#ff4d2d] transition-colors duration-200'>
+                                <Link to="/" className='text-gray-500 text-xs sm:text-sm hover:text-[#ff4d2d] transition-colors duration-200'>
                                     Partner with us
-                                </a>
+                                </Link>
                             </li>
                         </ul>
                     </div>

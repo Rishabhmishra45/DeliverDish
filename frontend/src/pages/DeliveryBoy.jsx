@@ -56,6 +56,7 @@ const DeliveryBoy = () => {
   const [deliveringId, setDeliveringId] = useState(null)
   const [errorMsg, setErrorMsg] = useState("")
   const [coords, setCoords] = useState({ latitude: null, longitude: null })
+  const [earnings, setEarnings] = useState(null)
 
   const fetchData = async (isInitial = false) => {
     try {
@@ -124,6 +125,23 @@ const DeliveryBoy = () => {
 
     return () => navigator.geolocation.clearWatch(watchId)
   }, [ongoingDeliveries.length])
+
+
+  useEffect(() => {
+    const fetchEarnings = async () => {
+      try {
+        const result = await axios.get(`${serverUrl}/api/order/my-earnings`, { withCredentials: true })
+        setEarnings(result.data)
+      } catch (error) {
+        console.log(error)
+      }
+    }
+
+    fetchEarnings()
+    const interval = setInterval(fetchEarnings, 5000)
+    return () => clearInterval(interval)
+  }, [])
+
 
   const handleAccept = async (orderId, shopOrderId) => {
 
@@ -313,7 +331,7 @@ const DeliveryBoy = () => {
       <div className='pt-[70px] flex'>
 
         {/* Sidebar */}
-        <div className='w-16 sm:w-56 min-h-[calc(100vh-70px)] bg-white border-r border-orange-100 flex flex-col py-4 sm:py-6 sticky top-[70px]'>
+        <div className='w-16 sm:w-56 min-h-[calc(100vh-70px)] bg-white border-r border-orange-100 flex flex-col py-4 sm:py-6  fixed top-[70px]'>
           {sidebarItems.map((item) => {
             const Icon = item.icon
             const isActive = activeTab === item.key
@@ -321,9 +339,8 @@ const DeliveryBoy = () => {
               <button
                 key={item.key}
                 onClick={() => setActiveTab(item.key)}
-                className={`flex items-center gap-3 px-3 sm:px-5 py-3 mx-2 sm:mx-3 rounded-xl transition-colors duration-200 ${
-                  isActive ? "bg-[#ff4d2d] text-white" : "text-gray-600 hover:bg-orange-50"
-                }`}
+                className={`flex items-center gap-3 px-3 sm:px-5 py-3 mx-2 sm:mx-3 rounded-xl transition-colors duration-200 ${isActive ? "bg-[#ff4d2d] text-white" : "text-gray-600 hover:bg-orange-50"
+                  }`}
               >
                 <Icon size={20} />
                 <span className='hidden sm:inline text-sm font-medium'>{item.label}</span>
@@ -344,6 +361,21 @@ const DeliveryBoy = () => {
           {/* HOME TAB */}
           {activeTab === "home" &&
             <>
+              <div className='bg-white rounded-2xl shadow-md border border-orange-100 p-5 sm:p-6 text-center mb-[30px]'>
+                <h1 className='text-lg sm:text-xl font-bold text-[#ff4d2d]'>
+                  Welcome, {userData?.fullName}
+                </h1>
+                <p className='text-xs sm:text-sm text-[#ff4d2d] mt-1'>
+                  {coords.latitude && coords.longitude
+                    ? <>
+                      <span className='font-medium'>Latitude:</span> {coords.latitude.toFixed(7)}, {" "}
+                      <span className='font-medium'>Longitude:</span> {coords.longitude.toFixed(7)}
+                    </>
+                    : "Fetching location..."
+                  }
+                </p>
+              </div>
+
               {ongoingDeliveries.length > 0 &&
                 <div>
                   <h2 className='text-lg sm:text-xl font-bold text-gray-800 mb-4'>
@@ -425,13 +457,42 @@ const DeliveryBoy = () => {
                 <p className='text-xs sm:text-sm text-[#ff4d2d] mt-1'>
                   {coords.latitude && coords.longitude
                     ? <>
-                        <span className='font-medium'>Latitude:</span> {coords.latitude.toFixed(7)}, {" "}
-                        <span className='font-medium'>Longitude:</span> {coords.longitude.toFixed(7)}
-                      </>
+                      <span className='font-medium'>Latitude:</span> {coords.latitude.toFixed(7)}, {" "}
+                      <span className='font-medium'>Longitude:</span> {coords.longitude.toFixed(7)}
+                    </>
                     : "Fetching location..."
                   }
                 </p>
               </div>
+
+              {earnings &&
+                <div className='bg-white rounded-2xl shadow-md border border-orange-100 p-5 sm:p-6'>
+                  <h2 className='text-base sm:text-lg font-bold text-gray-800 mb-4'>
+                    My Earnings
+                  </h2>
+                  <div className='grid grid-cols-3 gap-3'>
+                    <div className='bg-orange-50 rounded-xl px-3 py-3 text-center'>
+                      <p className='text-[10px] sm:text-xs text-gray-500'>Today</p>
+                      <p className='text-base sm:text-lg font-bold text-[#ff4d2d]'>₹{earnings.today.total}</p>
+                    </div>
+                    <div className='bg-orange-50 rounded-xl px-3 py-3 text-center'>
+                      <p className='text-[10px] sm:text-xs text-gray-500'>This Month</p>
+                      <p className='text-base sm:text-lg font-bold text-[#ff4d2d]'>₹{earnings.thisMonth.total}</p>
+                    </div>
+                    <div className='bg-orange-50 rounded-xl px-3 py-3 text-center'>
+                      <p className='text-[10px] sm:text-xs text-gray-500'>All Time</p>
+                      <p className='text-base sm:text-lg font-bold text-[#ff4d2d]'>₹{earnings.allTime.total}</p>
+                    </div>
+                  </div>
+
+                  <div className='mt-4 pt-4 border-t border-gray-100 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs sm:text-sm text-gray-600'>
+                    <p>Base pay: ₹{earnings.thisMonth.basePay}</p>
+                    <p>Night bonus: ₹{earnings.thisMonth.nightBonus}</p>
+                    <p>Milestone bonus: ₹{earnings.thisMonth.milestoneBonus}</p>
+                    <p>Tips: ₹{earnings.thisMonth.tips}</p>
+                  </div>
+                </div>
+              }
 
               <div className='bg-white rounded-2xl shadow-md border border-orange-100 p-5 sm:p-6'>
                 <div className='flex items-center justify-between flex-wrap gap-3 mb-5'>
