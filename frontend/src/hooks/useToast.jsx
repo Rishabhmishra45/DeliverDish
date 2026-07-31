@@ -11,7 +11,7 @@ function useToast() {
 
         setToast({ show: true, message, type, full: false })
 
-        // chhoti delay ke baad bar ko full karte hain taaki CSS transition trigger ho
+        
         setTimeout(() => {
             setToast((prev) => ({ ...prev, full: true }))
         }, 20)

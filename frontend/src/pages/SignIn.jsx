@@ -24,8 +24,8 @@ const SignIn = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const dispatch=useDispatch()
-  
+  const dispatch = useDispatch()
+
 
   const handleSignIn = async () => {
     setError("");

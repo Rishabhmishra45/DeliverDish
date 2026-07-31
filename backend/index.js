@@ -42,6 +42,18 @@ app.use(cors({
 
 app.use(express.json())
 app.use(cookieParser())
+
+// Health Check API
+app.get("/api/health", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Server is running",
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+  });
+});
+
+
 app.use("/api/auth", authRouter)
 app.use("/api/user", userRouter)
 app.use("/api/shop", shopRouter)
@@ -54,6 +66,6 @@ app.use("/api/review", reviewRouter)
 initSocket(server)
 
 server.listen(port, () => {
-    connectDb()
-    console.log(`server started at ${port}`)
+  connectDb()
+  console.log(`server started at ${port}`)
 })
