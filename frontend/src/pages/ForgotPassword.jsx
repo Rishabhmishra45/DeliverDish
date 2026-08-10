@@ -5,6 +5,7 @@ import { FaRegEyeSlash } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
 import axios from "axios"
 import { serverUrl } from "../App"
+// import Monkeyimg from "../assets/monkey-otp.png"
 
 const ForgotPassword = () => {
 
@@ -199,6 +200,7 @@ const ForgotPassword = () => {
                 {step === 2 && (
                     <div>
                         <div className='mb-2'>
+                            {/* <img src={Monkeyimg} alt="" /> */}
                             <label
                                 htmlFor="otp"
                                 className='block text-gray-700 font-medium mb-1 text-sm sm:text-base'
