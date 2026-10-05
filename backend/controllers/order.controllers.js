@@ -4,6 +4,7 @@ import User from "../models/user.model.js"
 import Shop from "../models/shop.model.js"
 import razorpayInstance from "../utils/razorpay.js"
 import { getDistanceKm } from "../utils/distance.js"
+import { getIo } from "../socket.js"
 
 const DELIVERY_FEE = 40
 const MAX_RADIUS_KM = 10
@@ -446,6 +447,12 @@ export const markDelivered = async (req, res) => {
         }
 
         await order.save()
+
+        // real-time: dono taraf ka chat turant lock kar do
+        getIo().to(`track_${shopOrderId}`).emit("orderStatusUpdate", {
+            shopOrderId,
+            status: "delivered"
+        })
 
         return res.status(200).json({ message: "marked as delivered", order })
     } catch (error) {

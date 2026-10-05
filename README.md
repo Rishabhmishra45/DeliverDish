@@ -7,6 +7,7 @@ A full-stack, real-time food delivery platform built with the **MERN stack**, su
 ## 🚀 Features
  
 ### 👤 Customer
+
 - Sign up / sign in with role selection (User, Owner, Delivery Boy)
 - Auto-detected location (city, state, address) via geolocation + reverse geocoding
 - Browse categories, nearby shops, and suggested items (real-time search & filters)
@@ -16,19 +17,29 @@ A full-stack, real-time food delivery platform built with the **MERN stack**, su
 - Order history (`My Orders`) with live status polling
 - **Real-time order tracking** — live map showing the delivery partner's location moving toward the customer (Socket.io)
 - Rate delivered items (1–5 stars + comment); item ratings update automatically
+
+![Customer Dashboard](./frontend/src/assets/screenshots/customer.png)
+
 ### 🏪 Restaurant Owner
+
 - Create/edit shop profile (name, image, address, auto-captured geolocation)
 - Add, edit, delete food items (category, veg/non-veg, price, image)
 - Dashboard with category, food-type, and search filters
 - Manage incoming orders: `pending → preparing → out for delivery`
 - View nearby available delivery partners (distance-based) once an order is dispatched
 - Delivered status is handled exclusively by the assigned delivery partner
+
+![Restaurant Owner Dashboard](./frontend/src/assets/screenshots/restaurant-owner.png)
+
 ### 🛵 Delivery Partner
+
 - Dashboard with sidebar: **Home** (new + ongoing orders), **Delivered** (history), **Analytics** (daily/monthly delivery charts)
 - Broadcasted orders within a **configurable radius (default 10 km)** of the shop — first to accept gets the order (atomic, race-condition safe)
 - Live location shared via GPS `watchPosition`, saved to backend and broadcast via Socket.io
 - One-tap "Mark as Delivered"
 - Custom map markers (scooter icon for self, home icon for customer) with a connecting route line
+
+![Delivery Boy Dashboard](./frontend/src/assets/screenshots/delivery-boy.png)
 ---
  
 ## 🛠️ Tech Stack

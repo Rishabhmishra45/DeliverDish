@@ -13,6 +13,7 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import scooterIcon from '../assets/scooter.png'
 import homeIcon from '../assets/home.png'
+import ChatBox from '../components/ChatBox'
 
 const scooterMarker = new L.Icon({
   iconUrl: scooterIcon,
@@ -224,7 +225,7 @@ const DeliveryBoy = () => {
 
   }, [pastDeliveries])
 
-  const renderOrderCard = (order, actionButton, showMap = false) => {
+  const renderOrderCard = (order, actionButton, showMap = false, showChat = false) => {
 
     const customerLat = order.deliveryAddress?.latitude
     const customerLon = order.deliveryAddress?.longitude
@@ -320,6 +321,16 @@ const DeliveryBoy = () => {
         </div>
 
         {actionButton}
+
+        {showChat &&
+          <ChatBox
+            orderId={order._id}
+            shopOrderId={order.shopOrder._id}
+            role="deliveryBoy"
+            status={order.shopOrder.status}
+            partnerName={order.user?.fullName}
+          />
+        }
       </div>
     )
   }
@@ -392,6 +403,7 @@ const DeliveryBoy = () => {
                         >
                           {deliveringId === order.shopOrder._id ? "Updating..." : "Mark as Delivered"}
                         </button>,
+                        true,
                         true
                       )
                     )}

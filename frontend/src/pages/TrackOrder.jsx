@@ -9,6 +9,7 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import scooterIcon from '../assets/scooter.png'
 import homeIcon from '../assets/home.png'
+import ChatBox from '../components/ChatBox'
 
 const scooterMarker = new L.Icon({
   iconUrl: scooterIcon,
@@ -79,10 +80,19 @@ const TrackOrder = () => {
       setBoyLocation(location)
     }
 
+    // order delivered ho jaane par status turant update karo (chat lock ke liye bhi zaroori)
+    const handleStatusUpdate = ({ shopOrderId: sId, status }) => {
+      if (sId === shopOrderId) {
+        setData((prev) => prev ? { ...prev, status } : prev)
+      }
+    }
+
     socket.on("deliveryLocationUpdate", handleLocationUpdate)
+    socket.on("orderStatusUpdate", handleStatusUpdate)
 
     return () => {
       socket.off("deliveryLocationUpdate", handleLocationUpdate)
+      socket.off("orderStatusUpdate", handleStatusUpdate)
     }
 
   }, [shopOrderId])
@@ -172,6 +182,16 @@ const TrackOrder = () => {
             )
           }
         </div>
+
+        {data.status !== "delivered" &&
+          <ChatBox
+            orderId={orderId}
+            shopOrderId={shopOrderId}
+            role="user"
+            status={data.status}
+            partnerName={data.deliveryBoy?.fullName}
+          />
+        }
 
       </div>
 
